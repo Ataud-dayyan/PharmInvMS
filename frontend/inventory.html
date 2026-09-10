@@ -1,0 +1,308 @@
+<!-- Pharmacist Inventory Management System - Inventory Page -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacist Dashboard - Inventory</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .nav {
+            background: #512BD4;
+            padding: 15px 25px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            background: #2ed573;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #512BD4;
+            font-weight: 600;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+
+        .btn-patch {
+            background: #eccc68;
+            color: #333;
+        }
+
+        .btn-delete {
+            background: #ff4757;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 450px;
+            max-width: 90%;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #a4b0be;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background: #512BD4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav">
+        <h2>💊 Pharmacist Inventory System</h2>
+        <div>
+            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
+            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3>📋 Current Medication Stock Balances</h3>
+                <button class="add-btn" onclick="openAddModal()">+ Register New Drug</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Drug Name</th>
+                        <th>Classification</th>
+                        <th>Stock Qty</th>
+                        <th>Expiry Date</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #888;">Loading stock balances...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #ff4757;">
+            <h3 style="color: #ff4757;">⚠️ Critical Stock Alerts</h3>
+            <div id="alertsContainer">
+                <p style="color: #888;">Checking inventory thresholds...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD DRUG MODAL -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h3>📦 Add New Drug Batch</h3>
+            <form id="addDrugForm">
+                <div class="form-group"><label>Medication Name</label><input type="text" id="addName" required
+                        placeholder="e.g., Vitamin C 500mg"></div>
+                <div class="form-group"><label>Description / Category</label><input type="text" id="addDesc" required
+                        placeholder="e.g., Immune Supplement"></div>
+                <div class="form-group"><label>Unit Price (₦)</label><input type="number" id="addPrice" step="0.01"
+                        required min="0"></div>
+                <div class="form-group"><label>Initial Stock Quantity</label><input type="number" id="addQty" required
+                        min="0"></div>
+                <div class="form-group"><label>Minimum Alert Level</label><input type="number" id="addMin" required
+                        min="0"></div>
+                <div class="form-group"><label>Expiry Date</label><input type="date" id="addExpiry" required></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Save to Inventory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- UPDATE STOCK MODAL -->
+    <div id="restockModal" class="modal">
+        <div class="modal-content">
+            <h3>🔄 Update Stock Balance</h3>
+            <p id="restockDrugLabel" style="font-weight: bold; color: #512BD4;"></p>
+            <form id="restockForm">
+                <input type="hidden" id="restockDrugId">
+                <div class="form-group">
+                    <label>New Total Stock Quantity</label>
+                    <input type="number" id="restockQty" required min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeRestockModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Update Balance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pending Prescriptions Section -->
+    <div
+        style="background: white; padding: 24px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: #333;">📦 Incoming Prescription Orders (Pending Dispense)</h3>
+            <button class="btn-sm btn-patch" onclick="loadPendingPrescriptions()">Refresh Queue</button>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa; text-align: left; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 10px;">Order ID</th>
+                    <th style="padding: 10px;">Items Count</th>
+                    <th style="padding: 10px;">Total Cost</th>
+                    <th style="padding: 10px;">Status</th>
+                    <th style="padding: 10px;">Created Date</th>
+                    <th style="padding: 10px; text-align: center;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="prescriptionsQueueBody">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 15px; color: #888;">Checking prescription
+                        queue...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Dispense Modal -->
+    <div id="dispenseModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: white; padding: 25px; border-radius: 6px; width: 450px; max-width: 90%;">
+            <h3 style="margin-top: 0;">Confirm Dispense</h3>
+            <p id="dispenseModalInfo" style="color: #555; font-size: 14px;"></p>
+            <div id="dispenseItemsList" style="margin-bottom: 20px; font-size: 14px;"></div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-sm" style="background: #ccc;"
+                    onclick="closeDispenseModal()">Cancel</button>
+                <button type="button" class="btn-sm btn-patch" id="confirmDispenseBtn">Authorize Dispense & Deduct
+                    Stock</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/inventory.js"></script>
+</body>
+
+</html>

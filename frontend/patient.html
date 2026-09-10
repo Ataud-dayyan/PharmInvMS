@@ -1,0 +1,101 @@
+<!-- Patient History Portal - Pharmacist Inventory Management System -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+        .nav { background: #512BD4; padding: 15px 25px; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; }
+        .logout-btn { background: #ff4757; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .container { background: white; padding: 30px; margin-top: 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #512BD4; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e0f2fe; color: #0369a1; }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <h2>🏥 Patient History Portal</h2>
+        <div>
+            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
+            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Welcome Back!</h1>
+        <p>Your authentication token was validated successfully by the ASP.NET Core backend API.</p>
+        <p><strong>Your Current Role Clearance:</strong> <span style="color: #512BD4;">Patient</span></p>
+        
+        <hr style="border: 1px solid #eee; margin: 30px 0;">
+        
+        <h3>📋 Your Prescription Records Overview</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Prescription Reference ID</th>
+                    <th>Date Prescribed</th>
+                    <th>Total Items</th>
+                    <th>Bill Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="prescriptionTableBody">
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #888; padding: 15px;">Loading your clinical records...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+            const rawRole = localStorage.getItem("user_role") || "";
+            const role = rawRole.trim().toLowerCase();
+
+            if (role !== "patient") {
+                alert("Access Denied: Patient clearance required.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcomeText").innerText = `Logged in: ${localStorage.getItem("user_name") || "Patient"}`;
+
+            try {
+                const patientId = localStorage.getItem("user_id");
+                const response = await fetchWithAuth(`/prescriptions/patient/${patientId}`); 
+                if (!response.ok) throw new Error("Could not retrieve prescription history.");
+                
+                const prescriptions = await response.json();
+                const tbody = document.getElementById("prescriptionTableBody");
+                tbody.innerHTML = "";
+
+                if (!prescriptions || prescriptions.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 15px;">No prescriptions found in your medical database history.</td></tr>`;
+                    return;
+                }
+                
+                prescriptions.forEach(p => {
+                    const cleanDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "N/A";
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><small style="font-family: monospace; color:#666;">${p.id}</small></td>
+                            <td>${cleanDate}</td>
+                            <td>${p.itemCount} items</td>
+                            <td><strong>₦${(p.totalAmount || 0).toFixed(2)}</strong></td>
+                            <td><span class="badge">${p.status}</span></td>
+                        </tr>`;
+                });
+            } catch (error) {
+                document.getElementById("prescriptionTableBody").innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4757; padding: 15px;">${error.message}</td></tr>`;
+            }
+        });
+    </script>
+</body>
+</html>

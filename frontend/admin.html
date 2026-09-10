@@ -1,0 +1,178 @@
+<!-- Admin Portal - Staff Management Page - Pharmacist Inventory Management System -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Staff Management</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+        .nav { background: #512BD4; padding: 15px 25px; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; }
+        .logout-btn { background: #ff4757; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .container { margin-top: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .card { background: white; padding: 24px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .tables-column { display: flex; flex-direction: column; }
+        h3 { margin-top: 0; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #512BD4; font-weight: 600; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #444; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .submit-btn { background: #512BD4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .role-admin { background: #ffe2e2; color: #ff4757; }
+        .role-pharmacist { background: #e3fcef; color: #00875a; }
+        .role-doctor { background: #deebff; color: #0747a6; }
+        .role-patient { background: #fff4de; color: #b06b00; }
+        .empty-row td { text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <h2>🛡️ Admin Management Console</h2>
+        <div>
+            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
+            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tables-column">
+
+            <div class="card">
+                <h3>🧑‍⚕️ Doctors &amp; Pharmacists</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email Address</th>
+                            <th>Assigned Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody">
+                        <tr class="empty-row"><td colspan="3">Fetching staff accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>🧍 Patients</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email Address</th>
+                            <th>Assigned Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientTableBody">
+                        <tr class="empty-row"><td colspan="3">Fetching patient accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>🛡️ Admins</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email Address</th>
+                            <th>Assigned Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <tr class="empty-row"><td colspan="3">Fetching admin accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <button style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    <a href="inventory.html" style="color: white; text-decoration: none;">Inventory Management</a>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="card">
+            <h3>➕ Provision Staff Account</h3>
+            <form id="registerStaffForm">
+                <div class="form-group">
+                    <label for="staffEmail">Email Address</label>
+                    <input type="email" id="staffEmail" required placeholder="staff@solvestation.com">
+                </div>
+                <div class="form-group">
+                    <label for="staffPassword">Temporary Password</label>
+                    <input type="password" id="staffPassword" required placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label for="staffRole">System Authorization Role</label>
+                    <select id="staffRole" required>
+                        <option value="Pharmacist">Pharmacist</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Patient">Patient</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        // Splits a flat list of users into the 3 tables by role and renders each.
+        // Call this instead of whatever used to populate a single #userTableBody.
+        // Expects each user object to look like: { id, email, role }
+        function renderUsersByRole(users) {
+            const patientBody = document.getElementById('patientTableBody');
+            const staffBody   = document.getElementById('staffTableBody');
+            const adminBody   = document.getElementById('adminTableBody');
+
+            const patients = [];
+            const staff    = []; // doctors + pharmacists
+            const admins   = [];
+
+            users.forEach(user => {
+                const role = (user.role || '').toLowerCase();
+                if (role === 'patient') {
+                    patients.push(user);
+                } else if (role === 'doctor' || role === 'pharmacist') {
+                    staff.push(user);
+                } else if (role === 'admin') {
+                    admins.push(user);
+                }
+            });
+
+            fillTable(patientBody, patients, 'No patient accounts found.');
+            fillTable(staffBody, staff, 'No doctor or pharmacist accounts found.');
+            fillTable(adminBody, admins, 'No admin accounts found.');
+        }
+
+        function fillTable(tbody, users, emptyMessage) {
+            tbody.innerHTML = '';
+
+            if (!users.length) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="3">${emptyMessage}</td></tr>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const roleClass = `role-${(user.role || '').toLowerCase()}`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id ?? ''}</td>
+                    <td>${user.email ?? ''}</td>
+                    <td><span class="badge ${roleClass}">${user.role ?? ''}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
