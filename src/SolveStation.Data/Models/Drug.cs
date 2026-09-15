@@ -72,7 +72,9 @@ public class Drug : BaseEntity<DrugId>
 
     public void UpdateExpiryDate(DateTime newExpiryDate)
     {
-        ExpiryDate = newExpiryDate;
+        ExpiryDate = newExpiryDate.Kind == DateTimeKind.Utc 
+            ? newExpiryDate 
+            : DateTime.SpecifyKind(newExpiryDate, DateTimeKind.Utc);
         MarkAsUpdated();
 
         if (IsNearExpiry())

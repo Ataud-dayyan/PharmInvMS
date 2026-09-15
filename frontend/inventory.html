@@ -7,103 +7,311 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pharmacist Dashboard - Inventory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/pIMS_Fav.png" type="image/png">
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --ink: #12292c;
+            --ink-soft: #1f3a3d;
+            --teal: #1c4a4f;
+            --teal-deep: #0d2426;
+            --paper: #f1efe6;
+            --surface: #fbfaf5;
+            --line: #ddd8c8;
+            --text: #23302d;
+            --text-muted: #6c7570;
+            --gold: #a9812f;
+            --gold-soft: #c9a663;
+            --brick: #8a3a2c;
+            --brick-soft: #f3e3dd;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--paper);
+            margin: 0;
+            padding: 0 0 48px;
+            color: var(--text);
+        }
+
+        /* ===== Header ===== */
         .nav {
-            background: #512BD4;
-            padding: 15px 25px;
-            color: white;
+            background: var(--teal-deep);
+            padding: 22px 40px;
+            color: #f1efe6;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 6px;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .nav .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .nav h2 {
+            margin: 0;
+            font-family: 'Spectral', Georgia, serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            letter-spacing: 0.2px;
+        }
+
+        .nav .brand-sub {
+            font-size: 0.78rem;
+            color: #b9c7c4;
+            font-weight: 500;
+        }
+
+        #welcomeText {
+            font-size: 0.88rem;
+            color: #d8dfd9;
+            margin-right: 18px;
         }
 
         .logout-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
+            background: transparent;
+            color: #f1efe6;
+            border: 1px solid #4a6669;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .logout-btn:hover {
+            background: #1a3538;
+            border-color: var(--gold-soft);
+        }
+
+        /* ===== Page shell ===== */
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 32px 0 20px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 24px;
+        }
+
+        .page-heading h1 {
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin: 0 0 4px;
+            color: var(--teal-deep);
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.92rem;
         }
 
         .add-btn {
-            background: #2ed573;
-            color: white;
+            background: var(--teal-deep);
+            color: #f1efe6;
             border: none;
-            padding: 10px 18px;
-            border-radius: 4px;
+            padding: 11px 20px;
+            border-radius: 3px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.2px;
+            transition: background 0.15s ease;
+        }
+
+        .add-btn:hover {
+            background: var(--ink-soft);
         }
 
         .container {
-            margin-top: 20px;
             display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 20px;
+            grid-template-columns: 2.6fr 1fr;
+            gap: 24px;
+            align-items: start;
         }
 
+        /* ===== Table card ===== */
         .card {
-            background: white;
-            padding: 24px;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 4px;
         }
 
-        h3 {
-            margin-top: 0;
-            color: #333;
+        .card-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .card-body {
+            padding: 6px 22px 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
         }
 
         th,
         td {
             text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--line);
             vertical-align: middle;
+            font-size: 0.9rem;
         }
 
         th {
-            background-color: #f8f9fa;
-            color: #512BD4;
+            color: var(--text-muted);
             font-weight: 600;
+            font-size: 0.76rem;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 10px;
+        }
+
+        td.num, td.date {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+        }
+
+        tbody tr:hover {
+            background: #f4f2e8;
         }
 
         .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            border-radius: 3px;
             cursor: pointer;
-            margin-right: 4px;
+            margin-right: 6px;
+            letter-spacing: 0.2px;
         }
 
         .btn-patch {
-            background: #eccc68;
-            color: #333;
+            background: transparent;
+            color: var(--gold);
+            border-color: var(--gold-soft);
+        }
+
+        .btn-patch:hover {
+            background: #f8f1e1;
         }
 
         .btn-delete {
-            background: #ff4757;
-            color: white;
+            background: transparent;
+            color: var(--brick);
+            border-color: #d4a89a;
         }
 
+        .btn-delete:hover {
+            background: var(--brick-soft);
+        }
+
+        /* ===== Critical Stock Alerts: distinct dark panel, scrollable ===== */
+        .alerts-panel {
+            background: var(--teal-deep);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--teal-deep);
+        }
+
+        .alerts-panel .card-header {
+            border-bottom: 1px solid #274a4d;
+            padding: 18px 20px 14px;
+        }
+
+        .alerts-panel h3 {
+            margin: 0;
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #f1efe6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alerts-panel .card-header p {
+            margin: 4px 0 0;
+            font-size: 0.78rem;
+            color: #93a6a3;
+        }
+
+        #alertsContainer {
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 14px 16px 16px;
+            scrollbar-width: thin;
+            scrollbar-color: #4a6669 var(--teal-deep);
+        }
+
+        #alertsContainer::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        #alertsContainer::-webkit-scrollbar-track {
+            background: var(--teal-deep);
+        }
+
+        #alertsContainer::-webkit-scrollbar-thumb {
+            background: #4a6669;
+            border-radius: 6px;
+        }
+
+        #alertsContainer::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-soft);
+        }
+
+        #alertsContainer > p {
+            color: #93a6a3;
+            font-size: 0.85rem;
+        }
+
+        .alert-item {
+            background: #163538;
+            border-left: 3px solid var(--gold-soft);
+            border-radius: 2px;
+            padding: 11px 13px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #e7e2d2;
+            line-height: 1.4;
+        }
+
+        .alert-item strong {
+            color: #f1efe6;
+        }
+
+        /* ===== Modals ===== */
         .modal {
             display: none;
             position: fixed;
@@ -112,17 +320,25 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(13, 36, 38, 0.55);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
+            background: var(--surface);
+            padding: 30px 32px;
+            border-radius: 4px;
             width: 450px;
             max-width: 90%;
+            border-top: 3px solid var(--gold);
+        }
+
+        .modal-content h3 {
+            font-family: 'Spectral', Georgia, serif;
+            font-weight: 600;
+            color: var(--ink);
+            margin-top: 0;
         }
 
         .form-group {
@@ -131,17 +347,26 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #444;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.82rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            padding: 9px 10px;
+            border: 1px solid var(--line);
+            border-radius: 3px;
+            background: #fff;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(28, 74, 79, 0.12);
         }
 
         .modal-actions {
@@ -152,22 +377,49 @@
         }
 
         .btn-cancel {
-            background: #a4b0be;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--line);
+            padding: 9px 16px;
+            border-radius: 3px;
             cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-cancel:hover {
+            background: #f4f2e8;
         }
 
         .btn-submit {
-            background: #512BD4;
-            color: white;
+            background: var(--teal-deep);
+            color: #f1efe6;
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 9px 18px;
+            border-radius: 3px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--ink-soft);
+        }
+
+        /* ===== Prescriptions section ===== */
+        .section-spacer {
+            margin-top: 30px;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            background: #eef0e4;
+            color: var(--text-muted);
+            border: 1px solid var(--line);
         }
     </style>
 </head>
@@ -175,41 +427,88 @@
 <body>
 
     <div class="nav">
-        <h2>💊 Pharmacist Inventory System</h2>
-        <div>
-            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
-            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        <div class="brand">
+            <h2>Pharmacist Inventory System</h2>
+            <span class="brand-sub">Stock & Dispense Ledger</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <span id="welcomeText"></span>
+            <button class="logout-btn" onclick="logoutUser()">Log out</button>
         </div>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3>📋 Current Medication Stock Balances</h3>
-                <button class="add-btn" onclick="openAddModal()">+ Register New Drug</button>
+    <div class="page">
+
+        <div class="page-heading">
+            <div>
+                <h1>Inventory</h1>
+                <p>Current stock balances and dispensing queue</p>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Drug Name</th>
-                        <th>Classification</th>
-                        <th>Stock Qty</th>
-                        <th>Expiry Date</th>
-                        <th style="text-align: center;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryTableBody">
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #888;">Loading stock balances...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <button class="add-btn" onclick="openAddModal()">+ Register New Drug</button>
         </div>
 
-        <div class="card" style="border-left: 4px solid #ff4757;">
-            <h3 style="color: #ff4757;">⚠️ Critical Stock Alerts</h3>
-            <div id="alertsContainer">
-                <p style="color: #888;">Checking inventory thresholds...</p>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Current Medication Stock Balances</h3>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Drug Name</th>
+                                <th>Classification</th>
+                                <th>Stock Qty</th>
+                                <th>Expiry Date</th>
+                                <th style="text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading stock
+                                    balances...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="alerts-panel">
+                <div class="card-header">
+                    <h3>⚠ Critical Stock Alerts</h3>
+                    <p>Below minimum threshold or nearing expiry</p>
+                </div>
+                <div id="alertsContainer">
+                    <p>Checking inventory thresholds...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Prescriptions Section -->
+        <div class="card section-spacer">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Incoming Prescription Orders — Pending Dispense</h3>
+                <button class="btn-sm btn-patch" onclick="loadPendingPrescriptions()">Refresh Queue</button>
+            </div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items Count</th>
+                            <th>Total Cost</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th style="text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prescriptionsQueueBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 15px; color: var(--text-muted);">
+                                Checking prescription queue...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -217,7 +516,7 @@
     <!-- ADD DRUG MODAL -->
     <div id="addModal" class="modal">
         <div class="modal-content">
-            <h3>📦 Add New Drug Batch</h3>
+            <h3>Add New Drug Batch</h3>
             <form id="addDrugForm">
                 <div class="form-group"><label>Medication Name</label><input type="text" id="addName" required
                         placeholder="e.g., Vitamin C 500mg"></div>
@@ -241,13 +540,21 @@
     <!-- UPDATE STOCK MODAL -->
     <div id="restockModal" class="modal">
         <div class="modal-content">
-            <h3>🔄 Update Stock Balance</h3>
-            <p id="restockDrugLabel" style="font-weight: bold; color: #512BD4;"></p>
+            <h3>Update Stock Balance</h3>
+            <p id="restockDrugLabel" style="font-weight: 600; color: var(--teal);"></p>
             <form id="restockForm">
                 <input type="hidden" id="restockDrugId">
                 <div class="form-group">
                     <label>New Total Stock Quantity</label>
                     <input type="number" id="restockQty" required min="0">
+                </div>
+                <div class="form-group">
+                    <label for="updateDrugPrice">Unit Price (₦)</label>
+                    <input type="number" id="updateDrugPrice" step="0.01" min="0" required />
+                </div>
+                <div class="form-group">
+                    <label for="updateExpiryDate">Expiration Date</label>
+                    <input type="date" id="updateExpiryDate" required />
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeRestockModal()">Cancel</button>
@@ -257,45 +564,15 @@
         </div>
     </div>
 
-    <!-- Pending Prescriptions Section -->
-    <div
-        style="background: white; padding: 24px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 25px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; color: #333;">📦 Incoming Prescription Orders (Pending Dispense)</h3>
-            <button class="btn-sm btn-patch" onclick="loadPendingPrescriptions()">Refresh Queue</button>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background: #f8f9fa; text-align: left; border-bottom: 2px solid #ddd;">
-                    <th style="padding: 10px;">Order ID</th>
-                    <th style="padding: 10px;">Items Count</th>
-                    <th style="padding: 10px;">Total Cost</th>
-                    <th style="padding: 10px;">Status</th>
-                    <th style="padding: 10px;">Created Date</th>
-                    <th style="padding: 10px; text-align: center;">Action</th>
-                </tr>
-            </thead>
-            <tbody id="prescriptionsQueueBody">
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 15px; color: #888;">Checking prescription
-                        queue...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
     <!-- Dispense Modal -->
-    <div id="dispenseModal"
-        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="background: white; padding: 25px; border-radius: 6px; width: 450px; max-width: 90%;">
-            <h3 style="margin-top: 0;">Confirm Dispense</h3>
-            <p id="dispenseModalInfo" style="color: #555; font-size: 14px;"></p>
-            <div id="dispenseItemsList" style="margin-bottom: 20px; font-size: 14px;"></div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" class="btn-sm" style="background: #ccc;"
-                    onclick="closeDispenseModal()">Cancel</button>
-                <button type="button" class="btn-sm btn-patch" id="confirmDispenseBtn">Authorize Dispense & Deduct
+    <div id="dispenseModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Dispense</h3>
+            <p id="dispenseModalInfo" style="color: var(--text-muted); font-size: 0.88rem;"></p>
+            <div id="dispenseItemsList" style="margin-bottom: 18px; font-size: 0.88rem;"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeDispenseModal()">Cancel</button>
+                <button type="button" class="btn-submit" id="confirmDispenseBtn">Authorize Dispense & Deduct
                     Stock</button>
             </div>
         </div>

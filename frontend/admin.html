@@ -2,141 +2,475 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal - Staff Management</title>
+    <link rel="icon" href="images/pIMS_Fav.png" type="image/png">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
-        .nav { background: #512BD4; padding: 15px 25px; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; }
-        .logout-btn { background: #ff4757; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .container { margin-top: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .card { background: white; padding: 24px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .tables-column { display: flex; flex-direction: column; }
-        h3 { margin-top: 0; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; color: #512BD4; font-weight: 600; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #444; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .submit-btn { background: #512BD4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .role-admin { background: #ffe2e2; color: #ff4757; }
-        .role-pharmacist { background: #e3fcef; color: #00875a; }
-        .role-doctor { background: #deebff; color: #0747a6; }
-        .role-patient { background: #fff4de; color: #b06b00; }
-        .empty-row td { text-align: center; color: #888; }
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Spectral:wght@400;600;700&display=swap');
+
+        :root {
+            /* Palette: Clinical, mature, paper & ink */
+            --ink: #0d2426;
+            --ink-soft: #4a5c5d;
+            --paper: #f9f8f6;
+            --surface: #ffffff;
+            --line: #dcdcdc;
+            
+            /* Accents */
+            --danger: #a93535;
+            --danger-soft: #fcedec;
+            --teal: #0f7a73;
+            --teal-soft: #e5f2f1;
+            --blue: #2b5b84;
+            --blue-soft: #eaf1f7;
+            --gold: #b38600;
+            --gold-soft: #fdf8e6;
+
+            --radius: 4px; /* Sharper, less SaaS-like */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, Arial, sans-serif;
+            background: var(--paper);
+            margin: 0;
+            padding: 0;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Spectral', serif;
+            color: var(--ink);
+            margin: 0;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Top Navigation: Deep Teal / Ink */
+        .nav {
+            background: var(--ink);
+            padding: 12px clamp(16px, 4vw, 32px);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .nav h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        #welcomeText {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #d1d9d9;
+        }
+
+        .logout-btn {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: #d1d9d9;
+            border: 1px solid #4a5c5d;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.15s ease;
+        }
+
+        .logout-btn:hover {
+            background: #1a3638;
+            color: white;
+            border-color: #71888a;
+        }
+
+        /* Page Header Layout */
+        .page-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px clamp(16px, 3vw, 28px) 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+            margin: 0;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px clamp(16px, 3vw, 28px);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Cards with Hairline Borders, No Drop Shadows */
+        .card {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--line);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .card-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 480px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            font-size: 0.85rem;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        th {
+            color: var(--ink-soft);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: var(--surface);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--ink);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            background: var(--surface);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--ink);
+            outline: none;
+        }
+
+        /* Clinical/Ledger Buttons */
+        .submit-btn {
+            background: var(--ink);
+            color: white;
+            border: 1px solid var(--ink);
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            width: 100%;
+            transition: background 0.15s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .submit-btn:hover {
+            background: #183d40;
+        }
+
+        .btn-sm {
+            font-family: 'Inter', sans-serif;
+            background: var(--surface);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 4px 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.75rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-sm:hover {
+            background: var(--danger-soft);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 2px; /* Square clinical look */
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border: 1px solid transparent;
+        }
+
+        .role-admin {
+            background: var(--danger-soft);
+            color: var(--danger);
+            border-color: #f7d7d7;
+        }
+
+        .role-pharmacist {
+            background: var(--teal-soft);
+            color: var(--teal);
+            border-color: #cdeae7;
+        }
+
+        .role-doctor {
+            background: var(--blue-soft);
+            color: var(--blue);
+            border-color: #d1e2f0;
+        }
+
+        .role-patient {
+            background: var(--gold-soft);
+            color: var(--gold);
+            border-color: #faeed4;
+        }
+
+        .empty-row td {
+            text-align: center;
+            color: var(--ink-soft);
+            padding: 24px 12px;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .inventory-link {
+            display: block;
+            background: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--line);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .inventory-link:hover {
+            border-color: var(--ink);
+            background: #f0f2f2;
+        }
+
+        @media (max-width: 860px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div class="nav">
-        <h2>🛡️ Admin Management Console</h2>
-        <div>
-            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
-            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        <h2>Pharmacy Information System</h2>
+        <div class="nav-right">
+            <span id="welcomeText"></span>
+            <button class="logout-btn" onclick="logoutUser()">Log Out</button>
         </div>
     </div>
 
-    <div class="container">
-        <div class="tables-column">
+    <!-- Added Proper Page Hierarchy -->
+    <header class="page-header">
+        <h1>Administrative Console</h1>
+        <p>Manage system access, role provisioning, and staff authorizations.</p>
+    </header>
 
-            <div class="card">
-                <h3>🧑‍⚕️ Doctors &amp; Pharmacists</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Email Address</th>
-                            <th>Assigned Role</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staffTableBody">
-                        <tr class="empty-row"><td colspan="3">Fetching staff accounts...</td></tr>
-                    </tbody>
-                </table>
+    <main>
+        <div class="container">
+            <div class="tables-column">
+
+                <!-- Doctors & Pharmacists Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Clinical & Dispensary Staff</h3>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User Identifier</th>
+                                    <th>Email Address</th>
+                                    <th>Clearance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffTableBody">
+                                <tr class="empty-row">
+                                    <td colspan="4">Querying database for staff records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Patients Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Registered Patients</h3>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User Identifier</th>
+                                    <th>Email Address</th>
+                                    <th>Clearance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientTableBody">
+                                <tr class="empty-row">
+                                    <td colspan="4">Querying database for patient records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Admins Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>System Administrators</h3>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User Identifier</th>
+                                    <th>Email Address</th>
+                                    <th>Clearance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody">
+                                <tr class="empty-row">
+                                    <td colspan="4">Querying database for administrator records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div class="card">
-                <h3>🧍 Patients</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Email Address</th>
-                            <th>Assigned Role</th>
-                        </tr>
-                    </thead>
-                    <tbody id="patientTableBody">
-                        <tr class="empty-row"><td colspan="3">Fetching patient accounts...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Provisioning / Actions Column -->
+            <div class="actions-column">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Provision Account</h3>
+                    </div>
+                    <form id="registerStaffForm">
+                        <div class="form-group">
+                            <label for="staffEmail">Email Address</label>
+                            <input type="email" id="staffEmail" required placeholder="staff@solvestation.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="staffPassword">Temporary Password</label>
+                            <input type="password" id="staffPassword" required placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label for="staffRole">System Authorization Role</label>
+                            <select id="staffRole" required>
+                                <option value="Pharmacist">Pharmacist</option>
+                                <option value="Doctor">Doctor</option>
+                                <option value="Admin">Administrator</option>
+                                <option value="Patient">Patient</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn">Issue Credentials</button>
+                    </form>
+                </div>
 
-            <div class="card">
-                <h3>🛡️ Admins</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Email Address</th>
-                            <th>Assigned Role</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminTableBody">
-                        <tr class="empty-row"><td colspan="3">Fetching admin accounts...</td></tr>
-                    </tbody>
-                </table>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>System Modules</h3>
+                    </div>
+                    <a href="inventory.html" class="inventory-link">Open Inventory Ledger →</a>
+                </div>
             </div>
-
-            <div class="card">
-                <button style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                    <a href="inventory.html" style="color: white; text-decoration: none;">Inventory Management</a>
-                </button>
-            </div>
-
         </div>
-
-        <div class="card">
-            <h3>➕ Provision Staff Account</h3>
-            <form id="registerStaffForm">
-                <div class="form-group">
-                    <label for="staffEmail">Email Address</label>
-                    <input type="email" id="staffEmail" required placeholder="staff@solvestation.com">
-                </div>
-                <div class="form-group">
-                    <label for="staffPassword">Temporary Password</label>
-                    <input type="password" id="staffPassword" required placeholder="••••••••">
-                </div>
-                <div class="form-group">
-                    <label for="staffRole">System Authorization Role</label>
-                    <select id="staffRole" required>
-                        <option value="Pharmacist">Pharmacist</option>
-                        <option value="Doctor">Doctor</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Patient">Patient</option>
-                    </select>
-                </div>
-                <button type="submit" class="submit-btn">Create Account</button>
-            </form>
-        </div>
-    </div>
+    </main>
 
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
     <script>
         // Splits a flat list of users into the 3 tables by role and renders each.
-        // Call this instead of whatever used to populate a single #userTableBody.
         // Expects each user object to look like: { id, email, role }
         function renderUsersByRole(users) {
             const patientBody = document.getElementById('patientTableBody');
-            const staffBody   = document.getElementById('staffTableBody');
-            const adminBody   = document.getElementById('adminTableBody');
+            const staffBody = document.getElementById('staffTableBody');
+            const adminBody = document.getElementById('adminTableBody');
 
             const patients = [];
-            const staff    = []; // doctors + pharmacists
-            const admins   = [];
+            const staff = []; // doctors + pharmacists
+            const admins = [];
 
             users.forEach(user => {
                 const role = (user.role || '').toLowerCase();
@@ -149,30 +483,38 @@
                 }
             });
 
-            fillTable(patientBody, patients, 'No patient accounts found.');
-            fillTable(staffBody, staff, 'No doctor or pharmacist accounts found.');
-            fillTable(adminBody, admins, 'No admin accounts found.');
+            fillTable(patientBody, patients, 'No active patient records found.');
+            fillTable(staffBody, staff, 'No clinical or dispensary staff records found.');
+            fillTable(adminBody, admins, 'No administrator records found.');
         }
 
         function fillTable(tbody, users, emptyMessage) {
             tbody.innerHTML = '';
 
             if (!users.length) {
-                tbody.innerHTML = `<tr class="empty-row"><td colspan="3">${emptyMessage}</td></tr>`;
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="4">${emptyMessage}</td></tr>`;
                 return;
             }
 
             users.forEach(user => {
                 const roleClass = `role-${(user.role || '').toLowerCase()}`;
                 const row = document.createElement('tr');
+                
+                // Added class="mono" to the ID field to apply the IBM Plex Mono font styling
                 row.innerHTML = `
-                    <td>${user.id ?? ''}</td>
+                    <td class="mono">${user.id ?? ''}</td>
                     <td>${user.email ?? ''}</td>
                     <td><span class="badge ${roleClass}">${user.role ?? ''}</span></td>
+                    <td>
+                        <button class="btn-sm" onclick="deactivateUser('${user.id}')">
+                            Revoke
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
         }
     </script>
 </body>
+
 </html>

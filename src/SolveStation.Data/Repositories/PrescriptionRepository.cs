@@ -14,6 +14,7 @@ public class PrescriptionRepository : BaseRepository<Prescription, PrescriptionI
     {
         return await GetActiveEntities()
             .Include(p => p.Items)
+                .ThenInclude(i => i.Drug)
             .Where(p => p.PatientId.Equals(patientId))
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(cancellationToken);

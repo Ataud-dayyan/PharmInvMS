@@ -7,90 +7,305 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Portal - Prescription Management</title>
+    <link rel="icon" href="images/pIMS_Fav.png" type="image/png">
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Spectral:wght@400;600;700&display=swap');
+
+        :root {
+            /* Palette: Clinical, mature, paper & ink */
+            --ink: #0d2426;
+            --ink-soft: #4a5c5d;
+            --paper: #f9f8f6;
+            --surface: #ffffff;
+            --line: #dcdcdc;
+            
+            /* Accents */
+            --teal: #0f7a73;
+            --teal-soft: #e5f2f1;
+            --gold: #b38600;
+            --gold-soft: #fdf8e6;
+            --blue: #2b5b84;
+            --danger: #a93535;
+            --danger-soft: #fcedec;
+
+            --radius: 4px;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, Arial, sans-serif;
+            background: var(--paper);
+            margin: 0;
+            padding: 0;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Spectral', serif;
+            color: var(--ink);
+            margin: 0;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Top Navigation */
         .nav {
-            background: #512BD4;
-            padding: 15px 25px;
+            background: var(--ink);
+            padding: 12px clamp(16px, 4vw, 32px);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 6px;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .nav h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        #welcomeText {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #d1d9d9;
         }
 
         .logout-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: #d1d9d9;
+            border: 1px solid #4a5c5d;
+            padding: 6px 12px;
+            border-radius: var(--radius);
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.15s ease;
+        }
+
+        .logout-btn:hover {
+            background: #1a3638;
+            color: white;
+            border-color: #71888a;
+        }
+
+        /* Page Header Layout */
+        .page-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px clamp(16px, 3vw, 28px) 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+            margin: 0;
+        }
+
+        .role-indicator {
+            color: var(--blue);
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px clamp(16px, 3vw, 28px);
         }
 
         .container {
-            margin-top: 20px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            align-items: start;
         }
 
+        /* Cards */
         .card {
-            background: white;
-            padding: 24px;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            background: var(--surface);
+            padding: 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--line);
         }
 
-        h3 {
-            margin-top: 0;
-            color: #333;
+        .card-header {
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
         }
 
+        .card-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Forms */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #444;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--ink);
         }
 
         .form-group input,
         .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            background: var(--surface);
+            transition: border-color 0.15s ease;
         }
 
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--ink);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Buttons */
         .submit-btn {
-            background: #512BD4;
+            background: var(--ink);
             color: white;
-            border: none;
+            border: 1px solid var(--ink);
             padding: 12px 20px;
-            border-radius: 4px;
+            border-radius: var(--radius);
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            font-size: 0.9rem;
             width: 100%;
-            margin-top: 10px;
+            transition: background 0.15s ease;
+            font-family: 'Inter', sans-serif;
+            margin-top: 12px;
         }
 
-        .item-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 2fr;
-            gap: 10px;
-            margin-bottom: 10px;
+        .submit-btn:hover {
+            background: #183d40;
+        }
+
+        .add-row-btn {
+            background: var(--surface);
+            color: var(--teal);
+            border: 1px solid var(--teal);
+            padding: 8px 14px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .add-row-btn:hover {
+            background: var(--teal-soft);
+        }
+
+        /* Overrides for dynamically injected JS styles (Logs) */
+        #doctorLogContainer > div {
+            background: var(--surface) !important;
+            border: 1px solid var(--line) !important;
+            border-left: 3px solid var(--blue) !important;
+            padding: 16px !important;
+            margin-bottom: 12px !important;
+            border-radius: var(--radius) !important;
+        }
+
+        #doctorLogContainer p {
+            color: var(--ink) !important;
+            font-family: 'IBM Plex Mono', monospace !important;
+            font-size: 0.85rem !important;
+            margin-bottom: 6px !important;
+        }
+
+        #doctorLogContainer small {
+            color: var(--ink-soft) !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 0.8rem !important;
+            display: block !important;
+        }
+
+        /* Overrides for dynamically injected JS styles (Medication Rows) */
+        .medication-item-row {
+            gap: 12px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .medication-item-row input {
+            border: 1px solid var(--line) !important;
+            border-radius: var(--radius) !important;
+            padding: 8px 10px !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 0.85rem !important;
+            background: var(--surface) !important;
+        }
+
+        .medication-item-row input:focus {
+            border-color: var(--ink) !important;
+            outline: none !important;
+        }
+
+        .medication-item-row button {
+            background: var(--surface) !important;
+            color: var(--danger) !important;
+            border: 1px solid var(--danger) !important;
+            border-radius: var(--radius) !important;
+            font-family: 'Inter', sans-serif !important;
+            transition: all 0.15s ease !important;
+            padding: 8px 12px !important;
+            cursor: pointer !important;
+        }
+
+        .medication-item-row button:hover {
+            background: var(--danger-soft) !important;
+        }
+
+        @media (max-width: 860px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .medication-item-row {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -98,64 +313,69 @@
 <body>
 
     <div class="nav">
-        <h2>📋 Doctor Prescription Console</h2>
-        <div>
-            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
-            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        <h2>Pharmacy Information System</h2>
+        <div class="nav-right">
+            <span id="welcomeText"></span>
+            <button class="logout-btn" onclick="logoutUser()">Log Out</button>
         </div>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <h3>✍️ Issue New Medical Prescription</h3>
-            <form id="prescriptionForm">
-                <!-- Patient Search Dropdown -->
-                <div class="form-group">
-                    <label for="patientSearch">Patient</label>
-                    <input type="text" id="patientSearch" list="patientOptions" required autocomplete="off"
-                        placeholder="Type patient name or email to search..." />
-                    <datalist id="patientOptions"></datalist>
-                    <input type="hidden" id="patientId" />
-                </div>
+    <header class="page-header">
+        <h1>Clinical Prescription Console</h1>
+        <p>Authorize and transmit diagnostic regimens to the pharmacy dispensary.</p>
+        <p style="margin-top: 8px;">Role Clearance: <span class="role-indicator">Doctor</span></p>
+    </header>
 
-                <!-- Medication Item Matrix -->
-                <div class="form-group">
-                    <label>Medication Item Matrix</label>
-                    <div id="medicationItemsContainer">
-                        <div class="item-row">
-                            <div>
-                                <input type="text" class="item-drug-search" list="drugOptions" required
-                                    autocomplete="off" placeholder="Type drug name to search..." />
-                                <datalist id="drugOptions"></datalist>
-                                <input type="hidden" class="item-drug-id" />
-                            </div>
-                            <div>
-                                <input type="number" class="item-qty" required min="1" placeholder="Qty" value="1" />
-                            </div>
-                            <div>
-                                <input type="text" class="item-instructions" required
-                                    placeholder="Dosage e.g., 2x daily" />
-                            </div>
-                        </div>
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Issue New Medical Prescription</h3>
+                </div>
+                <form id="prescriptionForm">
+                    <!-- Patient Search Dropdown -->
+                    <div class="form-group">
+                        <label for="patientSearch">Patient Registry Search</label>
+                        <input type="text" id="patientSearch" list="patientOptions" required autocomplete="off"
+                            placeholder="Type patient name or email to search..." />
+                        <datalist id="patientOptions"></datalist>
+                        <input type="hidden" id="patientId" />
                     </div>
+
+                    <!-- Global Drug Datalist lookup for all dynamic rows -->
+                    <datalist id="drugOptions"></datalist>
+
+                    <!-- Medication Item Matrix -->
+                    <div class="form-group">
+                        <label>Medication Item Matrix</label>
+                        
+                        <!-- Dynamic Drug Rows Injected Here by doctor.js -->
+                        <div id="medicationRowsContainer"></div>
+
+                        <button type="button" class="add-row-btn" onclick="addMedicationRow()">
+                            + Add Line Item
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prescriptionNotes">Clinical Notes & Directions</label>
+                        <textarea id="prescriptionNotes" placeholder="Additional clinical context, dosage nuances, or allergy warnings..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Authorize & Transmit Order</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Transmission Logs</h3>
                 </div>
-
-                <div class="form-group">
-                    <label for="prescriptionNotes">Clinical Notes & Directions</label>
-                    <textarea id="prescriptionNotes" rows="3" placeholder="Additional clinical context..."></textarea>
+                <div id="doctorLogContainer">
+                    <p style="color: var(--ink-soft); font-style: italic; text-align: center; margin-top: 20px; font-family: 'Inter', sans-serif !important;">Querying diagnostic history logs...</p>
                 </div>
-
-                <button type="submit" class="submit-btn">Authorize & Transmit Order</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h3>🔍 Recent Issued Prescriptions Logs</h3>
-            <div id="doctorLogContainer">
-                <p style="color: #888; text-align: center; margin-top: 30px;">Loading diagnostic history logs...</p>
             </div>
         </div>
-    </div>
+    </main>
 
     <script src="js/auth.js"></script>
     <script src="js/doctor.js"></script>

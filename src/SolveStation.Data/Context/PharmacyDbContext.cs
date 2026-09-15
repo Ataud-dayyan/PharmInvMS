@@ -15,6 +15,7 @@ public class PharmacyDbContext : DbContext
     public DbSet<Prescription> Prescriptions { get; set; }
     public DbSet<PrescriptionItem> PrescriptionItems { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    // public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

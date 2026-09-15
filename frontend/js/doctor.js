@@ -1,5 +1,6 @@
 let patientsLookup = [];
 let drugsLookup = [];
+let rowCounter = 0;
 
 document.addEventListener("DOMContentLoaded", async function () {
     const rawRole = localStorage.getItem("user_role") || "";
@@ -18,22 +19,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     await loadSelectionLookups();
     loadIssuedLogs();
 
+    // Initialize first row
+    addMedicationRow();
+
     const form = document.getElementById("prescriptionForm");
     if (form) form.addEventListener("submit", handlePrescriptionSubmit);
 
-    // Dynamic ID binding on selection
-    document.getElementById("patientSearch").addEventListener("input", function (e) {
-        const selected = patientsLookup.find(p => p.displayName.toLowerCase() === e.target.value.trim().toLowerCase());
-        document.getElementById("patientId").value = selected ? selected.id : "";
-    });
-
-    document.querySelector(".item-drug-search").addEventListener("input", function (e) {
-        const selected = drugsLookup.find(d => d.displayName.toLowerCase() === e.target.value.trim().toLowerCase());
-        document.querySelector(".item-drug-id").value = selected ? selected.id : "";
-    });
+    // Patient dynamic ID binding
+    const patientSearchInput = document.getElementById("patientSearch");
+    if (patientSearchInput) {
+        patientSearchInput.addEventListener("input", function (e) {
+            const selected = patientsLookup.find(p => p.displayName.toLowerCase() === e.target.value.trim().toLowerCase());
+            document.getElementById("patientId").value = selected ? selected.id : "";
+        });
+    }
 });
 
-// Load Patients and Drugs lists for autocomplete
 // Load Patients and Drugs lists for autocomplete
 async function loadSelectionLookups() {
     try {
@@ -46,7 +47,6 @@ async function loadSelectionLookups() {
             const data = await patientsRes.json();
             const list = data.items || data.data || (Array.isArray(data) ? data : []);
 
-            // Format full name display safely
             patientsLookup = list.map(p => {
                 const name = (p.firstName || p.lastName)
                     ? `${p.firstName || ''} ${p.lastName || ''}`.trim()
@@ -58,9 +58,11 @@ async function loadSelectionLookups() {
             });
 
             const pDatalist = document.getElementById("patientOptions");
-            pDatalist.innerHTML = patientsLookup
-                .map(p => `<option value="${p.displayName}"></option>`)
-                .join("");
+            if (pDatalist) {
+                pDatalist.innerHTML = patientsLookup
+                    .map(p => `<option value="${p.displayName}"></option>`)
+                    .join("");
+            }
         }
 
         if (drugsRes && drugsRes.ok) {
@@ -73,47 +75,104 @@ async function loadSelectionLookups() {
             }));
 
             const dDatalist = document.getElementById("drugOptions");
-            dDatalist.innerHTML = drugsLookup
-                .map(d => `<option value="${d.displayName}"></option>`)
-                .join("");
+            if (dDatalist) {
+                dDatalist.innerHTML = drugsLookup
+                    .map(d => `<option value="${d.displayName}"></option>`)
+                    .join("");
+            }
         }
     } catch (err) {
         console.error("Failed to load lookup data for dropdowns:", err);
     }
 }
 
+// Add dynamic medication row
+function addMedicationRow() {
+    const container = document.getElementById("medicationRowsContainer");
+    if (!container) return;
+
+    const rowId = `drug-row-${rowCounter++}`;
+    const rowDiv = document.createElement("div");
+    rowDiv.id = rowId;
+    rowDiv.className = "medication-item-row";
+    rowDiv.style.cssText = "display: flex; gap: 10px; margin-bottom: 10px; align-items: center;";
+
+    rowDiv.innerHTML = `
+        <input type="hidden" class="item-drug-id" />
+        <input type="text" list="drugOptions" class="item-drug-search" placeholder="Type drug name to search..." style="flex: 2; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required />
+        <input type="number" class="item-qty" min="1" value="1" placeholder="Qty" style="width: 70px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required />
+        <input type="text" class="item-instructions" placeholder="Dosage e.g., 2x daily" style="flex: 2; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required />
+        <button type="button" style="background: #ff4757; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;" onclick="removeMedicationRow('${rowId}')">✕</button>
+    `;
+
+    container.appendChild(rowDiv);
+
+    // Bind datalist lookup to this row's hidden ID input
+    const searchInput = rowDiv.querySelector(".item-drug-search");
+    const hiddenIdInput = rowDiv.querySelector(".item-drug-id");
+
+    searchInput.addEventListener("input", function (e) {
+        const selected = drugsLookup.find(
+            d => d.displayName.toLowerCase() === e.target.value.trim().toLowerCase()
+        );
+        hiddenIdInput.value = selected ? selected.id : "";
+    });
+}
+
+// Remove medication row
+function removeMedicationRow(rowId) {
+    const container = document.getElementById("medicationRowsContainer");
+    if (container && container.children.length > 1) {
+        document.getElementById(rowId).remove();
+    } else {
+        alert("A prescription must include at least one medication.");
+    }
+}
+
+// Handle submit with all medication items
 async function handlePrescriptionSubmit(e) {
     e.preventDefault();
 
     const patientId = document.getElementById("patientId").value.trim();
-    const drugId = document.querySelector(".item-drug-id").value.trim();
-
     if (!patientId) {
         alert("Please select a valid patient from the dropdown list.");
         return;
     }
 
-    if (!drugId) {
-        alert("Please select a valid medication from the dropdown list.");
+    const rowElements = document.querySelectorAll("#medicationRowsContainer .medication-item-row");
+    const items = [];
+
+    for (const row of rowElements) {
+        const drugId = row.querySelector(".item-drug-id").value.trim();
+        const drugSearch = row.querySelector(".item-drug-search").value.trim();
+        const quantity = parseInt(row.querySelector(".item-qty").value, 10);
+        const instructions = row.querySelector(".item-instructions").value.trim();
+
+        if (!drugId) {
+            alert(`Please select a valid medication from the dropdown for: "${drugSearch || 'unselected item'}"`);
+            return;
+        }
+
+        items.push({
+            drugId: drugId,
+            quantity: quantity,
+            instructions: instructions
+        });
+    }
+
+    if (items.length === 0) {
+        alert("Please add at least one medication item.");
         return;
     }
 
-    const notes = document.getElementById("prescriptionNotes").value;
+    const notes = document.getElementById("prescriptionNotes") ? document.getElementById("prescriptionNotes").value : "";
     const doctorId = localStorage.getItem("user_id") || "00000000-0000-0000-0000-000000000000";
-    const quantity = parseInt(document.querySelector(".item-qty").value, 10);
-    const instructions = document.querySelector(".item-instructions").value;
 
     const payload = {
         patientId: patientId,
         doctorId: doctorId,
         notes: notes,
-        items: [
-            {
-                drugId: drugId,
-                quantity: quantity,
-                instructions: instructions
-            }
-        ]
+        items: items
     };
 
     try {
@@ -124,9 +183,17 @@ async function handlePrescriptionSubmit(e) {
 
         if (response && response.ok) {
             alert("✅ Prescription authorized and sent to pharmacy!");
+            
+            // Reset form
             document.getElementById("prescriptionForm").reset();
             document.getElementById("patientId").value = "";
-            document.querySelector(".item-drug-id").value = "";
+
+            // Reset medication rows back to single empty row
+            const container = document.getElementById("medicationRowsContainer");
+            container.innerHTML = "";
+            rowCounter = 0;
+            addMedicationRow();
+
             loadIssuedLogs();
         } else {
             const errData = await response.json().catch(() => ({}));
@@ -140,6 +207,8 @@ async function handlePrescriptionSubmit(e) {
 
 async function loadIssuedLogs() {
     const container = document.getElementById("doctorLogContainer");
+    if (!container) return;
+
     try {
         const doctorId = localStorage.getItem("user_id");
         const response = await fetchWithAuth(`/prescriptions/doctor/${doctorId}`);

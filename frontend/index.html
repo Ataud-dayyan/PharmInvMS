@@ -1,4 +1,4 @@
-<!-- Login to the Pharmacist Inventory Management System page  -->
+<!-- Login to the Pharmacist Inventory Management System page -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,32 +6,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PharmInvMS - Portal Login</title>
+    <link rel="icon" href="images/pIMS_Fav.png" type="image/png">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 360px; }
-        .login-card h2 { margin-top: 0; color: #512BD4; text-align: center; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 12px; background: #512BD4; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
-        .btn-login:hover { background: #401fa8; }
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Spectral:wght@400;600;700&display=swap');
+
+        :root {
+            /* Palette: Clinical, mature, paper & ink */
+            --ink: #0d2426;
+            --ink-soft: #4a5c5d;
+            --paper: #f9f8f6;
+            --surface: #ffffff;
+            --line: #dcdcdc;
+            --gold: #b38600;
+            --radius: 4px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, Arial, sans-serif;
+            background: var(--paper);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        /* New Logo Styles */
+        .login-logo {
+            width: 140px; /* Adjust size as needed */
+            height: auto;
+            margin-bottom: 16px;
+            border-radius: 12px; /* Softens the dark square against the light background */
+            box-shadow: 0 4px 12px rgba(13, 36, 38, 0.15);
+        }
+
+        .login-header h1 {
+            font-family: 'Spectral', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--ink);
+        }
+
+        .login-header p {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin: 6px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .login-card {
+            background: var(--surface);
+            padding: 32px 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--line);
+            border-top: 3px solid var(--ink); 
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--ink);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            background: var(--surface);
+            transition: border-color 0.15s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--ink);
+            outline: none;
+        }
+
+        .btn-login {
+            background: var(--ink);
+            color: white;
+            border: 1px solid var(--ink);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: background 0.15s ease;
+            font-family: 'Inter', sans-serif;
+            margin-top: 8px;
+        }
+
+        .btn-login:hover {
+            background: #183d40;
+        }
+
+        .system-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.7rem;
+            color: var(--ink-soft);
+            font-family: 'IBM Plex Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2>🏥 Pharmacy Portal</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" required placeholder="user@solvestation.com">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn-login">Sign In</button>
-        </form>
+    <div class="login-wrapper">
+        <div class="login-header">
+            <!-- Injected Logo Here -->
+            <img src="images/pharminv.png" alt="PharmInvMS Logo" class="login-logo">
+            
+            <h1>Pharmacy Inventory System</h1>
+        </div>
+
+        <div class="login-card">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="user@solvestation.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-login">Sign In to Continue</button>
+            </form>
+        </div>
+
+        <div class="system-footer">
+            PharmInvMS v1.0 &copy; 2026
+        </div>
     </div>
 
     <script src="js/auth.js"></script>

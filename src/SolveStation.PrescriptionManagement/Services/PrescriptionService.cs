@@ -231,13 +231,12 @@ public class PrescriptionService : IPrescriptionService
         return new PrescriptionSearchResponse(pagedPrescriptions, totalCount, request.Page, request.PageSize, totalPages);
     }
 
-    public async Task<List<PrescriptionSummaryResponse>> GetPrescriptionsByPatientAsync(string patientId, CancellationToken cancellationToken = default)
+    public async Task<List<PrescriptionResponse>> GetPrescriptionsByPatientAsync(string patientId, CancellationToken cancellationToken = default)
     {
         var userId = new UserId(Guid.Parse(patientId));
         var prescriptions = await _prescriptionRepository.GetByPatientIdAsync(userId, cancellationToken);
-        return prescriptions.Select(MapToPrescriptionSummary).ToList();
+        return prescriptions.Select(MapToPrescriptionResponse).ToList();
     }
-
     public async Task<List<PrescriptionSummaryResponse>> GetPrescriptionsByDoctorAsync(string doctorId, CancellationToken cancellationToken = default)
     {
         var userId = new UserId(Guid.Parse(doctorId));

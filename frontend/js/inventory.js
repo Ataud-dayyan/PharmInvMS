@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (restockForm) restockForm.addEventListener("submit", handleRestock);
 });
 
+// Cache drugs in memory for modal lookups
+let cachedDrugs = [];
+
 // 1. FETCH INVENTORY
 async function loadInventoryData() {
     try {
@@ -32,6 +35,7 @@ async function loadInventoryData() {
 
         const payload = await response.json();
         const drugList = payload.items || payload.data || (Array.isArray(payload) ? payload : []);
+        cachedDrugs = drugList;
 
         const tbody = document.getElementById("inventoryTableBody");
         tbody.innerHTML = ""; 
@@ -71,40 +75,216 @@ async function loadInventoryData() {
 }
 
 // 2. FETCH LOW STOCK ALERTS
+// FETCH LOW STOCK & EXPIRY ALERTS
 async function loadStockAlerts() {
     try {
-        const response = await fetchWithAuth("/drugs/low-stock");
-        if (!response.ok) throw new Error("Failed to process stock alerts.");
+        const [lowStockRes, allDrugsRes] = await Promise.all([
+            fetchWithAuth("/drugs/low-stock"),
+            fetchWithAuth("/drugs")
+        ]);
 
-        const alerts = await response.json();
-        const alertList = alerts.items || alerts.data || (Array.isArray(alerts) ? alerts : []);
         const container = document.getElementById("alertsContainer");
-        container.innerHTML = ""; 
+        container.innerHTML = "";
 
-        if (alertList.length === 0) {
-            container.innerHTML = `<p style="color: #2ed573; font-weight: 600;">✅ All stock levels are within safe limits.</p>`;
-            return;
+        let alertCount = 0;
+
+        // 1. Low Stock Alerts
+        if (lowStockRes && lowStockRes.ok) {
+            const alerts = await lowStockRes.json();
+            const alertList = alerts.items || alerts.data || (Array.isArray(alerts) ? alerts : []);
+
+            alertList.forEach(alertItem => {
+                alertCount++;
+                const drugName = alertItem.name || "Item";
+                const qty = alertItem.stockQuantity !== undefined ? alertItem.stockQuantity : 0;
+                
+                container.innerHTML += `
+                    <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #ff4757;">
+                        <span style="background-color: #ffe0e3; color: #ff4757; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">LOW STOCK</span>
+                        <p style="margin: 5px 0 0 0; font-weight: 600; color: #333;">${drugName}</p>
+                        <small style="color: #666;">Only <strong>${qty}</strong> left in storage.</small>
+                    </div>
+                `;
+            });
         }
 
-        alertList.forEach(alertItem => {
-            const drugName = alertItem.name || "Item";
-            const qty = alertItem.stockQuantity !== undefined ? alertItem.stockQuantity : 0;
+        // 2. Expiry Alerts (Expired or Expiring within 30 days)
+        if (allDrugsRes && allDrugsRes.ok) {
+            const drugPayload = await allDrugsRes.json();
+            const allDrugs = drugPayload.items || drugPayload.data || (Array.isArray(drugPayload) ? drugPayload : []);
             
-            container.innerHTML += `
-                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <span style="background-color: #ffe0e3; color: #ff4757; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">LOW STOCK</span>
-                    <p style="margin: 5px 0 0 0; font-weight: 600; color: #333;">${drugName}</p>
-                    <small style="color: #666;">Only <strong>${qty}</strong> left in storage.</small>
-                </div>
-            `;
-        });
+            const today = new Date();
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+            allDrugs.forEach(drug => {
+                if (!drug.expiryDate) return;
+                const expDate = new Date(drug.expiryDate);
+
+                if (expDate <= today) {
+                    alertCount++;
+                    container.innerHTML += `
+                        <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #d63031;">
+                            <span style="background-color: #fab1a0; color: #d63031; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">EXPIRED</span>
+                            <p style="margin: 5px 0 0 0; font-weight: 600; color: #333;">${drug.name}</p>
+                            <small style="color: #d63031;">Expired on <strong>${expDate.toLocaleDateString()}</strong></small>
+                        </div>
+                    `;
+                } else if (expDate <= thirtyDaysFromNow) {
+                    alertCount++;
+                    container.innerHTML += `
+                        <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #e17055;">
+                            <span style="background-color: #ffeaa7; color: #d35400; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">EXPIRING SOON</span>
+                            <p style="margin: 5px 0 0 0; font-weight: 600; color: #333;">${drug.name}</p>
+                            <small style="color: #666;">Expires on <strong>${expDate.toLocaleDateString()}</strong></small>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        if (alertCount === 0) {
+            container.innerHTML = `<p style="color: #2ed573; font-weight: 600;">✅ All stock levels and shelf lives are safe.</p>`;
+        }
 
     } catch (error) {
         console.error("Alerts Fetch Error:", error);
-        document.getElementById("alertsContainer").innerHTML = `<p style="color: #ff4757;">Failed to look up alerts.</p>`;
+        document.getElementById("alertsContainer").innerHTML = `<p style="color: #ff4757;">Failed to load alerts.</p>`;
     }
 }
 
+// RESTOCK & EDIT MEDICATION (Stock, Price, Expiry)
+async function handleRestock(e) {
+    e.preventDefault();
+
+    const drugId = document.getElementById("restockDrugId").value.trim();
+    const newQuantity = parseInt(document.getElementById("restockQty").value, 10);
+    const priceInput = document.getElementById("updateDrugPrice");
+    const newPrice = priceInput ? parseFloat(priceInput.value) : null;
+    const expiryInput = document.getElementById("updateExpiryDate");
+    const newExpiry = expiryInput && expiryInput.value ? expiryInput.value : null;
+
+    if (!drugId) {
+        alert("Error: Missing Drug GUID identifier.");
+        return;
+    }
+
+    let loggedInUserId = localStorage.getItem("user_id") || localStorage.getItem("userId");
+
+    const stockPayload = {
+        newQuantity: newQuantity,
+        reason: "Routine stock update via pharmacist portal",
+        updatedBy: loggedInUserId
+    };
+
+    try {
+        // 1. Update stock count via PATCH
+        const stockResponse = await fetchWithAuth(`/drugs/${drugId}/stock`, {
+            method: "PATCH",
+            body: JSON.stringify(stockPayload)
+        });
+
+        if (!stockResponse.ok) {
+            const data = await stockResponse.json().catch(() => ({}));
+            throw new Error(data.message || `Server returned HTTP ${stockResponse.status}`);
+        }
+
+        // 2. Update price and/or expiry via PUT
+        const targetDrug = cachedDrugs.find(d => d.id === drugId);
+        if (targetDrug) {
+            const updatePayload = {
+                name: targetDrug.name,
+                description: targetDrug.description,
+                price: newPrice !== null && !isNaN(newPrice) ? newPrice : targetDrug.price,
+                stockQuantity: newQuantity,
+                minimumStockLevel: targetDrug.minimumStockLevel || 5,
+                expiryDate: newExpiry || targetDrug.expiryDate,
+                supplier: targetDrug.supplier || "Main Pharmacy Supplier"
+            };
+
+            await fetchWithAuth(`/drugs/${drugId}`, {
+                method: "PUT",
+                body: JSON.stringify(updatePayload)
+            });
+        }
+
+        alert("✅ Success: Medication stock, price, and expiry details updated!");
+        closeRestockModal();
+        loadInventoryData();
+        loadStockAlerts();
+
+    } catch (error) {
+        console.error("Restock Exception:", error);
+        alert(`Update Failed: ${error.message}`);
+    }
+}
+// LOAD PENDING ORDERS WITH DATE AND TIME
+async function loadPendingPrescriptions() {
+    const tbody = document.getElementById("prescriptionsQueueBody");
+    if (!tbody) return;
+
+    try {
+        const response = await fetchWithAuth("/prescriptions/pending");
+        if (!response.ok) throw new Error("Could not retrieve prescription queue.");
+
+        const data = await response.json();
+        const orders = Array.isArray(data) ? data : (data.items || []);
+
+        tbody.innerHTML = "";
+
+        if (orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #2ed573; font-weight: 600;">No pending prescription orders in queue.</td></tr>`;
+            return;
+        }
+
+        orders.forEach(order => {
+            const orderId = order.id || order.prescriptionId;
+            const count = Array.isArray(order.items) 
+                ? order.items.length 
+                : (order.itemsCount || order.itemCount || 1);
+
+            // Parse creation timestamp
+            const rawTimestamp = order.createdAt || order.CreatedAt;
+            let formattedDate = "N/A";
+            let formattedTime = "";
+
+            if (rawTimestamp) {
+                const dateObj = new Date(rawTimestamp);
+                formattedDate = dateObj.toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric"
+                });
+                formattedTime = dateObj.toLocaleTimeString(undefined, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true
+                });
+            }
+
+            const row = `
+                <tr style="border-bottom: 1px solid #eef0f5;">
+                    <td style="padding: 12px;"><code style="font-weight: bold; color: #512BD4;">#${orderId.substring(0, 8)}...</code></td>
+                    <td style="padding: 12px;">${count} item(s)</td>
+                    <td style="padding: 12px; font-weight: 600;">₦${(order.totalAmount || 0).toFixed(2)}</td>
+                    <td style="padding: 12px;"><span style="background: #fff3cd; color: #856404; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${order.status}</span></td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 600; color: #2b2d42;">${formattedDate}</div>
+                        <small style="color: #6a3bd9; font-weight: 600;">🕒 ${formattedTime}</small>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn-sm btn-patch" onclick="openDispenseModal('${orderId}')">Dispense Order</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    } catch (err) {
+        console.error("Queue error:", err);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #ff4757;">Failed to load queue: ${err.message}</td></tr>`;
+    }
+}
 // 3. CREATE DRUG
 async function handleCreateDrug(e) {
     e.preventDefault();
@@ -142,68 +322,6 @@ async function handleCreateDrug(e) {
     } catch (error) {
         console.error("Create Drug Error:", error);
         alert(`Failed to add drug: ${error.message}`);
-    }
-}
-
-// 4. RESTOCK / UPDATE STOCK
-async function handleRestock(e) {
-    e.preventDefault();
-
-    const drugId = document.getElementById("restockDrugId").value.trim();
-    const newQuantity = parseInt(document.getElementById("restockQty").value, 10);
-
-    if (!drugId) {
-        alert("Error: Missing Drug GUID identifier.");
-        return;
-    }
-
-    // Retrieve user GUID or extract from stored JWT token payload
-    let loggedInUserId = localStorage.getItem("user_id") || localStorage.getItem("userId");
-
-    if (!loggedInUserId || loggedInUserId === "00000000-0000-0000-0000-000000000000") {
-        const token = localStorage.getItem("jwt_token");
-        if (token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
-                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-                ).join(''));
-                const decoded = JSON.parse(jsonPayload);
-                loggedInUserId = decoded.nameid || decoded.sub || decoded.UserId || decoded.id;
-            } catch (err) {
-                console.warn("Could not decode JWT payload:", err);
-            }
-        }
-    }
-
-    const payload = {
-        newQuantity: newQuantity,
-        reason: "Routine stock update via pharmacist portal",
-        updatedBy: loggedInUserId
-    };
-
-    try {
-        const response = await fetchWithAuth(`/drugs/${drugId}/stock`, {
-            method: "PATCH",
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-            console.error("Backend Stock Update Error:", data);
-            throw new Error(data.message || `Server returned HTTP ${response.status}`);
-        }
-
-        alert("✅ Success: Stock balance updated!");
-        closeRestockModal();
-        loadInventoryData();
-        loadStockAlerts();
-
-    } catch (error) {
-        console.error("Restock Exception:", error);
-        alert(`Update Failed: ${error.message}`);
     }
 }
 
@@ -245,13 +363,19 @@ function openRestockModal(id, name, currentQty) {
     document.getElementById("restockDrugId").value = id;
     document.getElementById("restockDrugLabel").innerText = `${name} (Current: ${currentQty})`;
     document.getElementById("restockQty").value = currentQty;
+
+    const targetDrug = cachedDrugs.find(d => d.id === id);
+    const priceInput = document.getElementById("updateDrugPrice");
+    if (priceInput) {
+        priceInput.value = targetDrug && targetDrug.price !== undefined ? targetDrug.price : 0;
+    }
+
     document.getElementById("restockModal").style.display = "flex";
 }
+
 function closeRestockModal() { document.getElementById("restockModal").style.display = "none"; }
 
-// Append this call inside your DOMContentLoaded listener in inventory.js:
-// loadPendingPrescriptions();
-
+// 6. PRESCRIPTIONS QUEUE & DISPENSING
 let currentPrescriptionToFill = null;
 
 async function loadPendingPrescriptions() {
@@ -274,11 +398,14 @@ async function loadPendingPrescriptions() {
 
         orders.forEach(order => {
             const orderId = order.id || order.prescriptionId;
+            const count = Array.isArray(order.items) 
+                ? order.items.length 
+                : (order.itemsCount || order.itemCount || 1);
             const row = `
                 <tr style="border-bottom: 1px solid #eee;">
                     <td style="padding: 10px;"><strong>#${orderId.substring(0, 8)}...</strong></td>
-                    <td style="padding: 10px;">${order.itemsCount || 1} item(s)</td>
-                    <td style="padding: 10px;">$${(order.totalAmount || 0).toFixed(2)}</td>
+                    <td style="padding: 10px;">${count} item(s)</td>
+                    <td style="padding: 10px;">₦${(order.totalAmount || 0).toFixed(2)}</td>
                     <td style="padding: 10px;"><span style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px;">${order.status}</span></td>
                     <td style="padding: 10px;">${new Date(order.createdAt).toLocaleDateString()}</td>
                     <td style="padding: 10px; text-align: center;">

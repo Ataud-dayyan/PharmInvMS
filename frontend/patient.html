@@ -6,52 +6,304 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Portal</title>
+    <link rel="icon" href="images/pIMS_Fav.png" type="image/png">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
-        .nav { background: #512BD4; padding: 15px 25px; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; }
-        .logout-btn { background: #ff4757; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .container { background: white; padding: 30px; margin-top: 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; color: #512BD4; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e0f2fe; color: #0369a1; }
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Spectral:wght@400;600;700&display=swap');
+
+        :root {
+            /* Palette: Clinical, mature, paper & ink */
+            --ink: #0d2426;
+            --ink-soft: #4a5c5d;
+            --paper: #f9f8f6;
+            --surface: #ffffff;
+            --line: #dcdcdc;
+            
+            /* Accents */
+            --teal: #0f7a73;
+            --teal-soft: #e5f2f1;
+            --gold: #b38600;
+            --gold-soft: #fdf8e6;
+            --blue: #2b5b84;
+            --blue-soft: #eaf1f7;
+            --danger: #a93535;
+            --danger-soft: #fcedec;
+
+            --radius: 4px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, Arial, sans-serif;
+            background: var(--paper);
+            margin: 0;
+            padding: 0;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Spectral', serif;
+            color: var(--ink);
+            margin: 0;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Top Navigation: Deep Teal / Ink */
+        .nav {
+            background: var(--ink);
+            padding: 12px clamp(16px, 4vw, 32px);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .nav h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        #welcomeText {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #d1d9d9;
+        }
+
+        .logout-btn {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: #d1d9d9;
+            border: 1px solid #4a5c5d;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.15s ease;
+        }
+
+        .logout-btn:hover {
+            background: #1a3638;
+            color: white;
+            border-color: #71888a;
+        }
+
+        /* Page Header Layout */
+        .page-header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px clamp(16px, 3vw, 28px) 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+            margin: 0;
+        }
+
+        .role-indicator {
+            color: var(--teal);
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px clamp(16px, 3vw, 28px);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Cards with Hairline Borders, No Drop Shadows */
+        .order-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 16px;
+        }
+
+        .ref-id {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+        }
+
+        .order-date {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-top: 4px;
+        }
+
+        .order-total {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-top: 6px;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 2px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border: 1px solid transparent;
+        }
+
+        .badge-pending {
+            background: var(--gold-soft);
+            color: var(--gold);
+            border-color: #faeed4;
+        }
+
+        .badge-filled {
+            background: var(--teal-soft);
+            color: var(--teal);
+            border-color: #cdeae7;
+        }
+
+        /* Clinical Notes & Med Items */
+        .notes-block {
+            margin: 20px 0;
+            font-size: 0.85rem;
+            color: var(--ink);
+            background: var(--paper);
+            border-left: 3px solid var(--gold);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .notes-block strong {
+            font-weight: 600;
+            color: var(--ink-soft);
+            margin-right: 4px;
+        }
+
+        .notes-empty {
+            margin: 16px 0;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            font-style: italic;
+        }
+
+        .med-list-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--ink-soft);
+            margin-bottom: 12px;
+        }
+
+        .med-item {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--teal);
+            padding: 16px;
+            margin-bottom: 8px;
+            border-radius: var(--radius);
+        }
+
+        .med-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .med-header strong {
+            color: var(--ink);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .med-header span {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            font-weight: 500;
+        }
+
+        .med-instructions {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+        }
+
+        .med-instructions strong {
+            color: var(--ink);
+            font-weight: 500;
+        }
+        
+        .loading-text {
+            text-align: center;
+            color: var(--ink-soft);
+            padding: 40px 20px;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
 
     <div class="nav">
-        <h2>🏥 Patient History Portal</h2>
-        <div>
-            <span id="welcomeText" style="margin-right: 15px; font-weight: 600;"></span>
-            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        <h2>Pharmacy Information System</h2>
+        <div class="nav-right">
+            <span id="welcomeText"></span>
+            <button class="logout-btn" onclick="logoutUser()">Log Out</button>
         </div>
     </div>
 
-    <div class="container">
-        <h1>Welcome Back!</h1>
-        <p>Your authentication token was validated successfully by the ASP.NET Core backend API.</p>
-        <p><strong>Your Current Role Clearance:</strong> <span style="color: #512BD4;">Patient</span></p>
-        
-        <hr style="border: 1px solid #eee; margin: 30px 0;">
-        
-        <h3>📋 Your Prescription Records Overview</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Prescription Reference ID</th>
-                    <th>Date Prescribed</th>
-                    <th>Total Items</th>
-                    <th>Bill Amount</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="prescriptionTableBody">
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #888; padding: 15px;">Loading your clinical records...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <header class="page-header">
+        <h1>Patient History Portal</h1>
+        <p>Access your medical records, prescription history, and clinical instructions.</p>
+        <p style="margin-top: 8px;">Role Clearance: <span class="role-indicator">Patient</span></p>
+    </header>
+    
+    <main>
+        <h3 class="section-title">Prescriptions & Treatment Plan</h3>
+        <div id="patientPrescriptionsContainer">
+            <p class="loading-text">Querying database for clinical records...</p>
+        </div>
+    </main>
 
     <script src="js/auth.js"></script>
     <script>
@@ -65,35 +317,88 @@
                 return;
             }
 
-            document.getElementById("welcomeText").innerText = `Logged in: ${localStorage.getItem("user_name") || "Patient"}`;
+            document.getElementById("welcomeText").innerText = `${localStorage.getItem("user_name") || "Patient"}`;
 
             try {
                 const patientId = localStorage.getItem("user_id");
                 const response = await fetchWithAuth(`/prescriptions/patient/${patientId}`); 
                 if (!response.ok) throw new Error("Could not retrieve prescription history.");
                 
-                const prescriptions = await response.json();
-                const tbody = document.getElementById("prescriptionTableBody");
-                tbody.innerHTML = "";
+                const data = await response.json();
+                const prescriptions = Array.isArray(data) ? data : (data.items || []);
+                const container = document.getElementById("patientPrescriptionsContainer");
+                container.innerHTML = "";
 
                 if (!prescriptions || prescriptions.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 15px;">No prescriptions found in your medical database history.</td></tr>`;
+                    container.innerHTML = `<p class="loading-text">No prescriptions found in your medical database history.</p>`;
                     return;
                 }
                 
                 prescriptions.forEach(p => {
                     const cleanDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "N/A";
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><small style="font-family: monospace; color:#666;">${p.id}</small></td>
-                            <td>${cleanDate}</td>
-                            <td>${p.itemCount} items</td>
-                            <td><strong>₦${(p.totalAmount || 0).toFixed(2)}</strong></td>
-                            <td><span class="badge">${p.status}</span></td>
-                        </tr>`;
+                    const isFilled = p.status && p.status.toLowerCase() === "filled";
+                    const badgeClass = isFilled ? "badge-filled" : "badge-pending";
+
+                    const clinicalContext = (p.notes || p.Notes || "").trim();
+
+                    // Replaced inline styles with CSS classes
+                    const notesBlock = clinicalContext 
+                        ? `<div class="notes-block">
+                               <strong>Doctor's Clinical Notes:</strong> ${clinicalContext}
+                           </div>`
+                        : `<div class="notes-empty">
+                               No specific clinical notes attached.
+                           </div>`;
+
+                    let itemsHtml = "";
+                    const items = p.items || p.Items || [];
+
+                    if (items.length > 0) {
+                        itemsHtml = items.map(item => `
+                            <div class="med-item">
+                                <div class="med-header">
+                                    <strong>💊 ${item.drugName || item.DrugName || "Medication Item"}</strong>
+                                    <span class="mono">Qty: ${item.quantityPrescribed || item.quantityFilled || item.QuantityPrescribed || 1}</span>
+                                </div>
+                                <div class="med-instructions">
+                                    <strong>Dosage & Instructions:</strong> 
+                                    <span>${item.instructions || item.Instructions || "Use as directed by physician"}</span>
+                                </div>
+                            </div>
+                        `).join("");
+                    } else {
+                        itemsHtml = `<p class="notes-empty" style="margin: 6px 0;">No medication lines attached.</p>`;
+                    }
+
+                    // Replaced inline styles with CSS classes
+                    container.innerHTML += `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div>
+                                    <span class="mono ref-id">Ref #${(p.id || p.Id || '').substring(0, 8)}...</span>
+                                    <div class="order-date">Prescribed: ${cleanDate}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="badge ${badgeClass}">${p.status || p.Status}</span>
+                                    <div class="order-total mono">₦${(p.totalAmount || p.TotalAmount || 0).toFixed(2)}</div>
+                                </div>
+                            </div>
+
+                            ${notesBlock}
+
+                            <div>
+                                <div class="med-list-header">
+                                    Prescribed Medications (${items.length || p.itemCount || 1})
+                                </div>
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                    `;
                 });
             } catch (error) {
-                document.getElementById("prescriptionTableBody").innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4757; padding: 15px;">${error.message}</td></tr>`;
+                document.getElementById("patientPrescriptionsContainer").innerHTML = `
+                    <p class="loading-text" style="color: var(--danger);">${error.message}</p>
+                `;
             }
         });
     </script>
