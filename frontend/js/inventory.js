@@ -162,7 +162,9 @@ async function handleRestock(e) {
     const priceInput = document.getElementById("updateDrugPrice");
     const newPrice = priceInput ? parseFloat(priceInput.value) : null;
     const expiryInput = document.getElementById("updateExpiryDate");
-    const newExpiry = expiryInput && expiryInput.value ? expiryInput.value : null;
+    const newExpiry = expiryInput && expiryInput.value
+        ? new Date(expiryInput.value).toISOString()
+        : null;
 
     if (!drugId) {
         alert("Error: Missing Drug GUID identifier.");
@@ -218,7 +220,7 @@ async function handleRestock(e) {
         alert(`Update Failed: ${error.message}`);
     }
 }
-// LOAD PENDING ORDERS WITH DATE AND TIME
+// LOAD PENDING ORDERS WITH DATE AND TIME 
 async function loadPendingPrescriptions() {
     const tbody = document.getElementById("prescriptionsQueueBody");
     if (!tbody) return;
@@ -359,67 +361,89 @@ async function deleteDrug(id, name) {
 function openAddModal() { document.getElementById("addModal").style.display = "flex"; }
 function closeAddModal() { document.getElementById("addModal").style.display = "none"; }
 
+function formatDateForInput(dateValue) {
+    if (!dateValue) return "";
+    // Extract YYYY-MM-DD directly from ISO strings to avoid timezone day-shifts
+    if (typeof dateValue === "string" && dateValue.includes("T")) {
+        return dateValue.split("T")[0];
+    }
+    const parsed = new Date(dateValue);
+    if (isNaN(parsed.getTime())) return "";
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, "0");
+    const day = String(parsed.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
 function openRestockModal(id, name, currentQty) {
     document.getElementById("restockDrugId").value = id;
     document.getElementById("restockDrugLabel").innerText = `${name} (Current: ${currentQty})`;
     document.getElementById("restockQty").value = currentQty;
 
     const targetDrug = cachedDrugs.find(d => d.id === id);
+
     const priceInput = document.getElementById("updateDrugPrice");
     if (priceInput) {
         priceInput.value = targetDrug && targetDrug.price !== undefined ? targetDrug.price : 0;
     }
 
+    const expiryInput = document.getElementById("updateExpiryDate");
+    if (expiryInput) {
+        expiryInput.value = targetDrug ? formatDateForInput(targetDrug.expiryDate) : "";
+    }
+
     document.getElementById("restockModal").style.display = "flex";
 }
 
-function closeRestockModal() { document.getElementById("restockModal").style.display = "none"; }
-
+function closeRestockModal() {
+    document.getElementById("restockForm").reset();
+    document.getElementById("restockModal").style.display = "none";
+}
 // 6. PRESCRIPTIONS QUEUE & DISPENSING
 let currentPrescriptionToFill = null;
 
-async function loadPendingPrescriptions() {
-    const tbody = document.getElementById("prescriptionsQueueBody");
-    if (!tbody) return;
+//async function loadPendingPrescriptions() {
+//    const tbody = document.getElementById("prescriptionsQueueBody");
+//    if (!tbody) return;
 
-    try {
-        const response = await fetchWithAuth("/prescriptions/pending");
-        if (!response.ok) throw new Error("Could not retrieve prescription queue.");
+//    try {
+//        const response = await fetchWithAuth("/prescriptions/pending");
+//        if (!response.ok) throw new Error("Could not retrieve prescription queue.");
 
-        const data = await response.json();
-        const orders = Array.isArray(data) ? data : (data.items || []);
+//        const data = await response.json();
+//        const orders = Array.isArray(data) ? data : (data.items || []);
 
-        tbody.innerHTML = "";
+//        tbody.innerHTML = "";
 
-        if (orders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #2ed573; font-weight: 600;">No pending prescription orders in queue.</td></tr>`;
-            return;
-        }
+//        if (orders.length === 0) {
+//            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #2ed573; font-weight: 600;">No pending prescription orders in queue.</td></tr>`;
+//            return;
+//        }
 
-        orders.forEach(order => {
-            const orderId = order.id || order.prescriptionId;
-            const count = Array.isArray(order.items) 
-                ? order.items.length 
-                : (order.itemsCount || order.itemCount || 1);
-            const row = `
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px;"><strong>#${orderId.substring(0, 8)}...</strong></td>
-                    <td style="padding: 10px;">${count} item(s)</td>
-                    <td style="padding: 10px;">₦${(order.totalAmount || 0).toFixed(2)}</td>
-                    <td style="padding: 10px;"><span style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px;">${order.status}</span></td>
-                    <td style="padding: 10px;">${new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td style="padding: 10px; text-align: center;">
-                        <button class="btn-sm btn-patch" onclick="openDispenseModal('${orderId}')">Dispense Order</button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    } catch (err) {
-        console.error("Queue error:", err);
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #ff4757;">Failed to load queue.</td></tr>`;
-    }
-}
+//        orders.forEach(order => {
+//            const orderId = order.id || order.prescriptionId;
+//            const count = Array.isArray(order.items) 
+//                ? order.items.length 
+//                : (order.itemsCount || order.itemCount || 1);
+//            const row = `
+//                <tr style="border-bottom: 1px solid #eee;">
+//                    <td style="padding: 10px;"><strong>#${orderId.substring(0, 8)}...</strong></td>
+//                    <td style="padding: 10px;">${count} item(s)</td>
+//                    <td style="padding: 10px;">₦${(order.totalAmount || 0).toFixed(2)}</td>
+//                    <td style="padding: 10px;"><span style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px;">${order.status}</span></td>
+//                    <td style="padding: 10px;">${new Date(order.createdAt).toLocaleDateString()}</td>
+//                    <td style="padding: 10px; text-align: center;">
+//                        <button class="btn-sm btn-patch" onclick="openDispenseModal('${orderId}')">Dispense Order</button>
+//                    </td>
+//                </tr>
+//            `;
+//            tbody.innerHTML += row;
+//        });
+//    } catch (err) {
+//        console.error("Queue error:", err);
+//        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #ff4757;">Failed to load queue.</td></tr>`;
+//    }
+//}
 
 async function openDispenseModal(prescriptionId) {
     try {
