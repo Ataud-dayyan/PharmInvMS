@@ -1,8 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using SolveStation.Data.Extensions;
 using SolveStation.PharmacyApi.Configuration;
 using SolveStation.PharmacyApi.Middleware;
-using Serilog;
-using System.IdentityModel.Tokens.Jwt;
 
 // Clear default claims mapping to prevent interference with custom claims
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -35,7 +36,9 @@ builder.Services.AddApplicationServices();
 builder.Services.AddApiDocumentation();
 
 // Configure AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(
+    _ => { },
+    typeof(Program).Assembly);
 
 // Configure CORS
 builder.Services.AddCors(options =>

@@ -1,6 +1,7 @@
 using SolveStation.Data.Models;
 using SolveStation.Data.Context;
 namespace SolveStation.Data.Repositories;
+using Microsoft.Extensions.Logging;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
