@@ -6,6 +6,7 @@ using SolveStation.Data.Models;
 using SolveStation.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 namespace SolveStation.Authentication.Services;
 
