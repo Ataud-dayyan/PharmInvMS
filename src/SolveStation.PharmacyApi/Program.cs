@@ -81,6 +81,8 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.MapControllers();
 
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy" })).AllowAnonymous();
+
 // Ensure database is created and seeded
 try
 {
