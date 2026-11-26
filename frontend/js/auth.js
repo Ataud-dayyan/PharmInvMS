@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = "https://pharminvms.onrender.com/api";
 
 // 1. LOGIN FUNCTION
 async function loginUser(email, password) {
