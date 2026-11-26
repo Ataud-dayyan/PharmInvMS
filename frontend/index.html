@@ -78,36 +78,36 @@
             padding: 32px 28px;
             border-radius: var(--radius);
             border: 1px solid var(--line);
-            border-top: 3px solid var(--ink); 
+            border-top: 3px solid var(--ink);
         }
 
         .form-group {
             margin-bottom: 20px;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: var(--ink);
-        }
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                font-size: 0.85rem;
+                color: var(--ink);
+            }
 
-        .form-group input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            background: var(--surface);
-            transition: border-color 0.15s ease;
-        }
+            .form-group input {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                font-size: 0.9rem;
+                font-family: 'Inter', sans-serif;
+                background: var(--surface);
+                transition: border-color 0.15s ease;
+            }
 
-        .form-group input:focus {
-            border-color: var(--ink);
-            outline: none;
-        }
+                .form-group input:focus {
+                    border-color: var(--ink);
+                    outline: none;
+                }
 
         .btn-login {
             background: var(--ink);
@@ -124,8 +124,33 @@
             margin-top: 8px;
         }
 
-        .btn-login:hover {
-            background: #183d40;
+            .btn-login:hover {
+                background: #183d40;
+            }
+
+        /* Status line shown under the fields (errors and "server waking up" hint) */
+        .login-status {
+            margin: 0 0 12px 0;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--line);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+            .login-status[hidden] {
+                display: none;
+            }
+
+        .login-status--info {
+            background: var(--paper);
+            color: var(--ink-soft);
+        }
+
+        .login-status--error {
+            background: #fbf1f0;
+            border-color: #e3bcb8;
+            color: #7a2a22;
         }
 
         .system-footer {
@@ -145,7 +170,7 @@
         <div class="login-header">
             <!-- Injected Logo Here -->
             <img src="images/pharminv.png" alt="PharmInvMS Logo" class="login-logo">
-            
+
             <h1>Pharmacy Inventory System</h1>
         </div>
 
@@ -159,6 +184,7 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" required placeholder="••••••••">
                 </div>
+                <div id="loginStatus" class="login-status" hidden></div>
                 <button type="submit" class="btn-login">Sign In to Continue</button>
             </form>
         </div>
@@ -168,6 +194,8 @@
         </div>
     </div>
 
+    <!-- loading.js must come before auth.js -->
+    <script src="js/loading.js"></script>
     <script src="js/auth.js"></script>
     <script>
         document.getElementById("loginForm").addEventListener("submit", function (e) {
