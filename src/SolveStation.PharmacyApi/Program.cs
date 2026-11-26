@@ -45,7 +45,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("PharmacyPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3001", "http://127.0.0.1:5500", "http://localhost:5500", "https://pharminvms.onrender.com/api") // Add your frontend URLs
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3001", "http://127.0.0.1:5500", "http://localhost:5500", "https://pharminvmsys.onrender.com"") // Add your frontend URLs
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
