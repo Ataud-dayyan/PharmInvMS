@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SolveStation.PrescriptionManagement.Models;
 using SolveStation.PrescriptionManagement.Services;
 using SolveStation.Data.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SolveStation.PrescriptionManagement.Controllers;
 

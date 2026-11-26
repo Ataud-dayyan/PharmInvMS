@@ -4,6 +4,7 @@ using SolveStation.Data.Models;
 using SolveStation.Common.Exceptions;
 using SolveStation.Common.Interfaces;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 
 namespace SolveStation.Authentication.Services;
 

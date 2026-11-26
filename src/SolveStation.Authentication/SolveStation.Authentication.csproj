@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
@@ -20,5 +20,9 @@
     <ProjectReference Include="..\SolveStation.Common\SolveStation.Common.csproj" />
     <ProjectReference Include="..\SolveStation.UserManagement\SolveStation.UserManagement.csproj" />
   </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 
 </Project>

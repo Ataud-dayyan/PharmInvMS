@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using SolveStation.Data.Models;
 using SolveStation.Data.Repositories;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace SolveStation.Authentication.Services;
 
