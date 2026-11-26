@@ -32,6 +32,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: var(--paper);
@@ -48,27 +52,36 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
             border-bottom: 3px solid var(--gold);
         }
 
-        .nav .brand {
+            .nav .brand {
+                display: flex;
+                align-items: baseline;
+                flex-wrap: wrap;
+                gap: 4px 12px;
+            }
+
+            .nav h2 {
+                margin: 0;
+                font-family: 'Spectral', Georgia, serif;
+                font-weight: 600;
+                font-size: 1.4rem;
+                letter-spacing: 0.2px;
+            }
+
+            .nav .brand-sub {
+                font-size: 0.78rem;
+                color: #b9c7c4;
+                font-weight: 500;
+            }
+
+        .nav-user {
             display: flex;
-            align-items: baseline;
-            gap: 12px;
-        }
-
-        .nav h2 {
-            margin: 0;
-            font-family: 'Spectral', Georgia, serif;
-            font-weight: 600;
-            font-size: 1.4rem;
-            letter-spacing: 0.2px;
-        }
-
-        .nav .brand-sub {
-            font-size: 0.78rem;
-            color: #b9c7c4;
-            font-weight: 500;
+            align-items: center;
+            gap: 0;
         }
 
         #welcomeText {
@@ -89,10 +102,10 @@
             transition: background 0.15s ease, border-color 0.15s ease;
         }
 
-        .logout-btn:hover {
-            background: #1a3538;
-            border-color: var(--gold-soft);
-        }
+            .logout-btn:hover {
+                background: #1a3538;
+                border-color: var(--gold-soft);
+            }
 
         /* ===== Page shell ===== */
         .page {
@@ -105,24 +118,26 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 14px;
             padding: 32px 0 20px;
             border-bottom: 1px solid var(--line);
             margin-bottom: 24px;
         }
 
-        .page-heading h1 {
-            font-family: 'Spectral', Georgia, serif;
-            font-size: 1.9rem;
-            font-weight: 600;
-            margin: 0 0 4px;
-            color: var(--teal-deep);
-        }
+            .page-heading h1 {
+                font-family: 'Spectral', Georgia, serif;
+                font-size: 1.9rem;
+                font-weight: 600;
+                margin: 0 0 4px;
+                color: var(--teal-deep);
+            }
 
-        .page-heading p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.92rem;
-        }
+            .page-heading p {
+                margin: 0;
+                color: var(--text-muted);
+                font-size: 0.92rem;
+            }
 
         .add-btn {
             background: var(--teal-deep);
@@ -137,13 +152,13 @@
             transition: background 0.15s ease;
         }
 
-        .add-btn:hover {
-            background: var(--ink-soft);
-        }
+            .add-btn:hover {
+                background: var(--ink-soft);
+            }
 
         .container {
             display: grid;
-            grid-template-columns: 2.6fr 1fr;
+            grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr);
             gap: 24px;
             align-items: start;
         }
@@ -153,6 +168,7 @@
             background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 4px;
+            min-width: 0;
         }
 
         .card-header {
@@ -160,16 +176,26 @@
             border-bottom: 1px solid var(--line);
         }
 
-        .card-header h3 {
-            margin: 0;
-            font-family: 'Spectral', Georgia, serif;
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: var(--ink);
+            .card-header h3 {
+                margin: 0;
+                font-family: 'Spectral', Georgia, serif;
+                font-size: 1.15rem;
+                font-weight: 600;
+                color: var(--ink);
+            }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .card-body {
             padding: 6px 22px 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
@@ -193,6 +219,7 @@
             letter-spacing: 0.3px;
             border-bottom: 1px solid var(--ink);
             padding-bottom: 10px;
+            white-space: nowrap;
         }
 
         td.num, td.date {
@@ -222,9 +249,9 @@
             border-color: var(--gold-soft);
         }
 
-        .btn-patch:hover {
-            background: #f8f1e1;
-        }
+            .btn-patch:hover {
+                background: #f8f1e1;
+            }
 
         .btn-delete {
             background: transparent;
@@ -232,9 +259,9 @@
             border-color: #d4a89a;
         }
 
-        .btn-delete:hover {
-            background: var(--brick-soft);
-        }
+            .btn-delete:hover {
+                background: var(--brick-soft);
+            }
 
         /* ===== Critical Stock Alerts: distinct dark panel, scrollable ===== */
         .alerts-panel {
@@ -242,29 +269,30 @@
             border-radius: 4px;
             overflow: hidden;
             border: 1px solid var(--teal-deep);
+            min-width: 0;
         }
 
-        .alerts-panel .card-header {
-            border-bottom: 1px solid #274a4d;
-            padding: 18px 20px 14px;
-        }
+            .alerts-panel .card-header {
+                border-bottom: 1px solid #274a4d;
+                padding: 18px 20px 14px;
+            }
 
-        .alerts-panel h3 {
-            margin: 0;
-            font-family: 'Spectral', Georgia, serif;
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #f1efe6;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+            .alerts-panel h3 {
+                margin: 0;
+                font-family: 'Spectral', Georgia, serif;
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: #f1efe6;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
 
-        .alerts-panel .card-header p {
-            margin: 4px 0 0;
-            font-size: 0.78rem;
-            color: #93a6a3;
-        }
+            .alerts-panel .card-header p {
+                margin: 4px 0 0;
+                font-size: 0.78rem;
+                color: #93a6a3;
+            }
 
         #alertsContainer {
             max-height: 420px;
@@ -274,27 +302,27 @@
             scrollbar-color: #4a6669 var(--teal-deep);
         }
 
-        #alertsContainer::-webkit-scrollbar {
-            width: 7px;
-        }
+            #alertsContainer::-webkit-scrollbar {
+                width: 7px;
+            }
 
-        #alertsContainer::-webkit-scrollbar-track {
-            background: var(--teal-deep);
-        }
+            #alertsContainer::-webkit-scrollbar-track {
+                background: var(--teal-deep);
+            }
 
-        #alertsContainer::-webkit-scrollbar-thumb {
-            background: #4a6669;
-            border-radius: 6px;
-        }
+            #alertsContainer::-webkit-scrollbar-thumb {
+                background: #4a6669;
+                border-radius: 6px;
+            }
 
-        #alertsContainer::-webkit-scrollbar-thumb:hover {
-            background: var(--gold-soft);
-        }
+                #alertsContainer::-webkit-scrollbar-thumb:hover {
+                    background: var(--gold-soft);
+                }
 
-        #alertsContainer > p {
-            color: #93a6a3;
-            font-size: 0.85rem;
-        }
+            #alertsContainer > p {
+                color: #93a6a3;
+                font-size: 0.85rem;
+            }
 
         .alert-item {
             background: #163538;
@@ -305,11 +333,12 @@
             font-size: 0.85rem;
             color: #e7e2d2;
             line-height: 1.4;
+            overflow-wrap: anywhere;
         }
 
-        .alert-item strong {
-            color: #f1efe6;
-        }
+            .alert-item strong {
+                color: #f1efe6;
+            }
 
         /* ===== Modals ===== */
         .modal {
@@ -323,6 +352,7 @@
             background: rgba(13, 36, 38, 0.55);
             justify-content: center;
             align-items: center;
+            padding: 16px;
         }
 
         .modal-content {
@@ -330,48 +360,51 @@
             padding: 30px 32px;
             border-radius: 4px;
             width: 450px;
-            max-width: 90%;
+            max-width: 100%;
+            max-height: 100%;
+            overflow-y: auto;
             border-top: 3px solid var(--gold);
         }
 
-        .modal-content h3 {
-            font-family: 'Spectral', Georgia, serif;
-            font-weight: 600;
-            color: var(--ink);
-            margin-top: 0;
-        }
+            .modal-content h3 {
+                font-family: 'Spectral', Georgia, serif;
+                font-weight: 600;
+                color: var(--ink);
+                margin-top: 0;
+            }
 
         .form-group {
             margin-bottom: 15px;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: var(--text-muted);
-            font-size: 0.82rem;
-        }
+            .form-group label {
+                display: block;
+                margin-bottom: 6px;
+                font-weight: 500;
+                color: var(--text-muted);
+                font-size: 0.82rem;
+            }
 
-        .form-group input {
-            width: 100%;
-            padding: 9px 10px;
-            border: 1px solid var(--line);
-            border-radius: 3px;
-            background: #fff;
-            font-family: 'Inter', Arial, sans-serif;
-            font-size: 0.9rem;
-        }
+            .form-group input {
+                width: 100%;
+                padding: 9px 10px;
+                border: 1px solid var(--line);
+                border-radius: 3px;
+                background: #fff;
+                font-family: 'Inter', Arial, sans-serif;
+                font-size: 0.9rem;
+            }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--teal);
-            box-shadow: 0 0 0 3px rgba(28, 74, 79, 0.12);
-        }
+                .form-group input:focus {
+                    outline: none;
+                    border-color: var(--teal);
+                    box-shadow: 0 0 0 3px rgba(28, 74, 79, 0.12);
+                }
 
         .modal-actions {
             display: flex;
             justify-content: flex-end;
+            flex-wrap: wrap;
             gap: 10px;
             margin-top: 20px;
         }
@@ -386,9 +419,9 @@
             font-size: 0.85rem;
         }
 
-        .btn-cancel:hover {
-            background: #f4f2e8;
-        }
+            .btn-cancel:hover {
+                background: #f4f2e8;
+            }
 
         .btn-submit {
             background: var(--teal-deep);
@@ -401,9 +434,9 @@
             font-size: 0.85rem;
         }
 
-        .btn-submit:hover {
-            background: var(--ink-soft);
-        }
+            .btn-submit:hover {
+                background: var(--ink-soft);
+            }
 
         /* ===== Prescriptions section ===== */
         .section-spacer {
@@ -421,6 +454,209 @@
             color: var(--text-muted);
             border: 1px solid var(--line);
         }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        /* Tablet: stack the alerts panel under the stock table */
+        @media (max-width: 900px) {
+            .nav {
+                padding: 18px 24px;
+            }
+
+            .page {
+                padding: 0 24px;
+            }
+
+            .container {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            #alertsContainer {
+                max-height: 320px;
+            }
+        }
+
+        /* Phone: tables become stacked cards, no sideways scrolling */
+        @media (max-width: 640px) {
+            .nav {
+                padding: 14px 16px;
+            }
+
+                .nav h2 {
+                    font-size: 1.15rem;
+                }
+
+            .nav-user {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            #welcomeText {
+                margin-right: 10px;
+                font-size: 0.82rem;
+            }
+
+            .page {
+                padding: 0 16px;
+            }
+
+            .page-heading {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 22px 0 16px;
+                margin-bottom: 18px;
+            }
+
+                .page-heading h1 {
+                    font-size: 1.55rem;
+                }
+
+            .add-btn {
+                width: 100%;
+                min-height: 44px;
+            }
+
+            .container {
+                gap: 18px;
+            }
+
+            .section-spacer {
+                margin-top: 20px;
+            }
+
+            .card-header {
+                padding: 14px 16px;
+            }
+
+                .card-header h3 {
+                    font-size: 1.05rem;
+                }
+
+            .card-body {
+                padding: 4px 14px 14px;
+                overflow-x: visible;
+            }
+
+            /* Table -> cards */
+            table,
+            thead,
+            tbody,
+            tr,
+            th,
+            td {
+                display: block;
+                width: 100%;
+            }
+
+            thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+            }
+
+            tbody tr {
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                background: #fff;
+                margin: 12px 0;
+                padding: 4px 12px;
+            }
+
+                tbody tr:hover {
+                    background: #fff;
+                }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 14px;
+                padding: 9px 0;
+                text-align: right !important;
+                border-bottom: 1px dashed var(--line);
+                overflow-wrap: anywhere;
+            }
+
+                td:last-child {
+                    border-bottom: none;
+                }
+
+                td[data-label]::before {
+                    content: attr(data-label);
+                    flex: 0 0 auto;
+                    max-width: 45%;
+                    text-align: left;
+                    font-size: 0.74rem;
+                    font-weight: 600;
+                    color: var(--text-muted);
+                }
+
+                /* Loading / empty-state rows (colspan) */
+                td[colspan] {
+                    display: block;
+                    text-align: center !important;
+                    border-bottom: none;
+                }
+
+                /* Action cells: full-width touch-friendly buttons */
+                td[data-label^="Action"] {
+                    justify-content: stretch;
+                    gap: 8px;
+                    padding-top: 12px;
+                }
+
+                    td[data-label^="Action"]::before {
+                        display: none;
+                    }
+
+                    td[data-label^="Action"] .btn-sm {
+                        flex: 1;
+                        margin-right: 0;
+                    }
+
+            .btn-sm {
+                min-height: 38px;
+                padding: 8px 12px;
+            }
+
+            .card-header-row .btn-sm {
+                margin-right: 0;
+            }
+
+            #alertsContainer {
+                max-height: 280px;
+            }
+
+            /* Modals: roomy, scrollable, no iOS zoom on focus */
+            .modal {
+                padding: 10px;
+                align-items: flex-end;
+            }
+
+            .modal-content {
+                padding: 22px 18px;
+                width: 100%;
+            }
+
+            .form-group input {
+                font-size: 16px;
+                min-height: 42px;
+            }
+
+            .modal-actions {
+                flex-direction: column-reverse;
+            }
+
+                .modal-actions .btn-cancel,
+                .modal-actions .btn-submit {
+                    width: 100%;
+                    min-height: 44px;
+                }
+        }
     </style>
 </head>
 
@@ -431,7 +667,7 @@
             <h2>Pharmacist Inventory System</h2>
             <span class="brand-sub">Stock & Dispense Ledger</span>
         </div>
-        <div style="display: flex; align-items: center;">
+        <div class="nav-user">
             <span id="welcomeText"></span>
             <button class="logout-btn" onclick="logoutUser()">Log out</button>
         </div>
@@ -465,8 +701,10 @@
                         </thead>
                         <tbody id="inventoryTableBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading stock
-                                    balances...</td>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">
+                                    Loading stock
+                                    balances...
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -486,7 +724,7 @@
 
         <!-- Pending Prescriptions Section -->
         <div class="card section-spacer">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="card-header card-header-row">
                 <h3>Incoming Prescription Orders — Pending Dispense</h3>
                 <button class="btn-sm btn-patch" onclick="loadPendingPrescriptions()">Refresh Queue</button>
             </div>
@@ -505,7 +743,8 @@
                     <tbody id="prescriptionsQueueBody">
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 15px; color: var(--text-muted);">
-                                Checking prescription queue...</td>
+                                Checking prescription queue...
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -518,16 +757,26 @@
         <div class="modal-content">
             <h3>Add New Drug Batch</h3>
             <form id="addDrugForm">
-                <div class="form-group"><label>Medication Name</label><input type="text" id="addName" required
-                        placeholder="e.g., Vitamin C 500mg"></div>
-                <div class="form-group"><label>Description / Category</label><input type="text" id="addDesc" required
-                        placeholder="e.g., Immune Supplement"></div>
-                <div class="form-group"><label>Unit Price (₦)</label><input type="number" id="addPrice" step="0.01"
-                        required min="0"></div>
-                <div class="form-group"><label>Initial Stock Quantity</label><input type="number" id="addQty" required
-                        min="0"></div>
-                <div class="form-group"><label>Minimum Alert Level</label><input type="number" id="addMin" required
-                        min="0"></div>
+                <div class="form-group">
+                    <label>Medication Name</label><input type="text" id="addName" required
+                                                         placeholder="e.g., Vitamin C 500mg">
+                </div>
+                <div class="form-group">
+                    <label>Description / Category</label><input type="text" id="addDesc" required
+                                                                placeholder="e.g., Immune Supplement">
+                </div>
+                <div class="form-group">
+                    <label>Unit Price (₦)</label><input type="number" id="addPrice" step="0.01"
+                                                        required min="0" inputmode="decimal">
+                </div>
+                <div class="form-group">
+                    <label>Initial Stock Quantity</label><input type="number" id="addQty" required
+                                                                min="0" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Alert Level</label><input type="number" id="addMin" required
+                                                             min="0" inputmode="numeric">
+                </div>
                 <div class="form-group"><label>Expiry Date</label><input type="date" id="addExpiry" required></div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
@@ -546,11 +795,11 @@
                 <input type="hidden" id="restockDrugId">
                 <div class="form-group">
                     <label>New Total Stock Quantity</label>
-                    <input type="number" id="restockQty" required min="0">
+                    <input type="number" id="restockQty" required min="0" inputmode="numeric">
                 </div>
                 <div class="form-group">
                     <label for="updateDrugPrice">Unit Price (₦)</label>
-                    <input type="number" id="updateDrugPrice" step="0.01" min="0" required />
+                    <input type="number" id="updateDrugPrice" step="0.01" min="0" required inputmode="decimal" />
                 </div>
                 <div class="form-group">
                     <label for="updateExpiryDate">Expiration Date</label>
@@ -572,14 +821,45 @@
             <div id="dispenseItemsList" style="margin-bottom: 18px; font-size: 0.88rem;"></div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeDispenseModal()">Cancel</button>
-                <button type="button" class="btn-submit" id="confirmDispenseBtn">Authorize Dispense & Deduct
-                    Stock</button>
+                <button type="button" class="btn-submit" id="confirmDispenseBtn">
+                    Authorize Dispense & Deduct
+                    Stock
+                </button>
             </div>
         </div>
     </div>
 
     <script src="js/auth.js"></script>
     <script src="js/inventory.js"></script>
+
+    <!-- Adds data-label to table cells (from the column headers) so rows can
+         stack as labelled cards on phones. Works with rows rendered by inventory.js. -->
+    <script>
+        (function () {
+            function labelTable(table) {
+                var heads = Array.prototype.map.call(
+                    table.querySelectorAll('thead th'),
+                    function (th) { return th.textContent.trim(); }
+                );
+                table.querySelectorAll('tbody tr').forEach(function (tr) {
+                    Array.prototype.forEach.call(tr.children, function (td, i) {
+                        if (!td.hasAttribute('colspan') && heads[i] && td.getAttribute('data-label') !== heads[i]) {
+                            td.setAttribute('data-label', heads[i]);
+                        }
+                    });
+                });
+            }
+
+            document.querySelectorAll('table').forEach(function (table) {
+                labelTable(table);
+                var body = table.querySelector('tbody');
+                if (body) {
+                    new MutationObserver(function () { labelTable(table); })
+                        .observe(body, { childList: true });
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
