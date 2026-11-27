@@ -74,6 +74,8 @@ async function loadInventoryData() {
     }
 }
 
+
+
 // 2. FETCH LOW STOCK ALERTS
 // FETCH LOW STOCK & EXPIRY ALERTS
 async function loadStockAlerts() {
