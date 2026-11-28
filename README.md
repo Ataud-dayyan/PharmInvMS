@@ -1,285 +1,205 @@
-# 🏥 Pharmacy Inventory & Prescription Management System
+# 🏥 Pharmacy Inventory & Prescription Management System (PharmInvMS)
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-336791)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-336791)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
+
+## 🌐 Live Deployment
+
+- **Frontend Portal (Render Static Site):** [https://pharminvmsys.onrender.com](https://pharminvmsys.onrender.com)
+- **Backend Web API (Render Docker Service):** [https://pharminvms.onrender.com](https://pharminvms.onrender.com)
+- **API Health Check:** [https://pharminvms.onrender.com/health](https://pharminvms.onrender.com/health)
+- **Database:** Neon Serverless PostgreSQL
+
+> **Note:** The backend runs on Render's free tier and spins down after 15 minutes of inactivity. The first request after an idle period may take 30–50 seconds while the container wakes up.
+
+---
 
 ## 📋 Overview
 
-A secure, role-based web API system for managing prescriptions and pharmacy inventory. Built with modern C# practices,
-featuring JWT authentication, comprehensive role management, and efficient inventory tracking.
+**PharmInvMS** is a full-stack, role-based Pharmacy Inventory and Prescription Management System built with **ASP.NET Core 8**, **Entity Framework Core**, **PostgreSQL**, and a vanilla **HTML/CSS/JavaScript** frontend. It enforces JWT authentication with refresh tokens, Role-Based Access Control (RBAC), atomic prescription dispensing with automatic stock deduction, and real-time low-stock and expiration alerts.
 
 ### 🎯 Key Features
 
-- **🔐 Secure Authentication**: JWT-based authentication with role-based access control
-- **👨‍⚕️ Doctor Portal**: Create and manage digital prescriptions
-- **💊 Pharmacy Management**: Comprehensive inventory tracking and management
-- **👥 Patient Access**: View prescription history and status
-- **📊 Analytics**: Track usage metrics and system performance
-- **🏗️ Modern Architecture**: Clean architecture with DDD patterns
+- **🔐 JWT Authentication & RBAC:** Stateless bearer authentication with token refresh, revocation, and role-restricted endpoints.
+- **💊 Real-Time Inventory Tracking:** Manage medication batches, unit pricing, stock quantities (`PATCH`), and expiration dates with automatic low-stock and 30-day expiry alerts.
+- **📋 Atomic Prescription Fulfillment:** Pharmacists review incoming pending prescriptions and authorize dispensing, deducting stock balances in a single consistent workflow.
+- **👨‍⚕️ Multi-Role Workflows:** Dedicated portals and permissions for Admins, Pharmacists, Doctors, and Patients.
+- **🐳 Containerized Cloud Deployment:** Multi-stage `Dockerfile` deployed on Render alongside a managed Neon PostgreSQL database.
 
 ### 👥 User Roles
 
-| Role           | Permissions                                                |
-|----------------|------------------------------------------------------------|
-| **Doctor**     | Create prescriptions, view own patients                    |
-| **Pharmacist** | Manage inventory, fulfill prescriptions, view stock alerts |
-| **Patient**    | View prescription history and status                       |
-| **Admin**      | User management, system administration                     |
+| Role           | Permissions                                                                 |
+|----------------|-----------------------------------------------------------------------------|
+| **Admin**      | Full user management, role administration, and inventory oversight          |
+| **Pharmacist** | Register/update/delete drugs, monitor stock & expiry alerts, fill orders    |
+| **Doctor**     | Create digital prescriptions and view patient prescription records          |
+| **Patient**    | View personal prescription history and fulfillment status                   |
 
-## 🏗️ Architecture
+---
 
+## 🏗️ Project Structure
+
+```text
+PharmInvMS/
+├── Dockerfile                                 # Multi-stage .NET 8 build & runtime image for Render
+├── frontend/                                  # Static web client (deployed via Render Static Site)
+│   ├── index.html                             # Login portal
+│   ├── inventory.html                         # Pharmacist stock & alerts dashboard
+│   ├── patient.html                           # Patient prescription view
+│   ├── prescriptions.html                     # Prescription management view
+│   ├── js/                                    # API client, auth guards, and UI logic
+│   └── images/                                # Favicons and brand assets
+├── scripts/                                   # Database & migration maintenance scripts
+│   └── fix-migration-history.ps1
+├── src/
+│   ├── SolveStation.Common/                   # Shared models, exceptions, interfaces, extensions
+│   ├── SolveStation.Authentication/           # JWT generation, refresh tokens, auth services
+│   ├── SolveStation.UserManagement/           # User CRUD and role management
+│   ├── SolveStation.PrescriptionManagement/   # Prescription creation and dispensing controllers
+│   ├── SolveStation.InventoryManagement/      # Drug stock management and alert logic
+│   ├── SolveStation.Data/                     # PharmacyDbContext, EF Core migrations, seeding
+│   └── SolveStation.PharmacyApi/              # Web API entry point, middleware, CORS, health check
+└── README.md
 ```
-src/
-├── SolveStation.Common/           # Shared models, exceptions, interfaces
-├── SolveStation.Authentication/   # JWT, security, authorization
-├── SolveStation.UserManagement/   # User CRUD, role management
-├── SolveStation.PrescriptionManagement/ # Prescription workflows
-├── SolveStation.InventoryManagement/    # Stock management, alerts
-├── SolveStation.Data/            # Entity Framework, repositories
-└── SolveStation.PharmacyApi/     # Web API, controllers, middleware
-```
 
-## 🚀 Quick Start
+---
+
+## 🚀 Local Development Setup
 
 ### Prerequisites
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [PostgreSQL 13+](https://www.postgresql.org/download/)
+- [PostgreSQL 13+](https://www.postgresql.org/download/) (PostgreSQL 16/17 recommended)
+- [EF Core CLI Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet) (`dotnet tool install --global dotnet-ef --version 8.0.11`)
 - [Git](https://git-scm.com/downloads)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/)
 
-### 🔧 Development Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/SolveStation/solve-inventory-pharmacy.git
-   cd solve-inventory-pharmacy
-   ```
-
-2. **Set up database**
-   ```bash
-   # Start PostgreSQL with Docker
-   docker-compose up -d postgres
-   
-   # Or install PostgreSQL locally and create database
-   createdb pharmacy_inventory
-   ```
-
-3. **Configure application settings**
-   ```bash
-   # Copy example settings
-   cp src/SolveStation.PharmacyApi/appsettings.example.json src/SolveStation.PharmacyApi/appsettings.json
-   
-   # Update connection string and JWT settings
-   ```
-
-4. **Install dependencies and build**
-   ```bash
-   dotnet restore
-   dotnet build
-   ```
-
-5. **Run database migrations**
-   ```bash
-   dotnet ef database update -p src/SolveStation.Data -s src/SolveStation.PharmacyApi
-   ```
-
-6. **Start the application**
-   ```bash
-   dotnet run --project src/SolveStation.PharmacyApi
-   ```
-
-7. **Access the application**
-    - API: https://localhost:5001
-    - Swagger UI: https://localhost:5001/swagger
-    - Health Check: https://localhost:5001/health
-
-### 🐳 Docker Development
+### 1. Clone the Repository
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f api
-
-# Stop services
-docker-compose down
+git clone [https://github.com/Ataud-dayyan/PharmInvMS.git](https://github.com/Ataud-dayyan/PharmInvMS.git)
+cd PharmInvMS
 ```
 
-## 🧪 Testing
+### 2. Configure Secrets Safely (.NET User Secrets)
 
-### Run Tests
+Avoid hardcoding database passwords or JWT keys in `appsettings.json`. Store local credentials in **.NET User Secrets**:
 
 ```bash
-# Run all tests
-dotnet test
-
-# Run with coverage
-dotnet test --collect:"XPlat Code Coverage"
-
-# Run specific test project
-dotnet test tests/SolveStation.UserManagement.Tests
+cd src/SolveStation.PharmacyApi
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=SolveStationPharmacyDb;Username=postgres;Password=YOUR_LOCAL_PASSWORD"
+dotnet user-secrets set "JwtSettings:SecretKey" "YOUR_LOCAL_JWT_SECRET_KEY_AT_LEAST_32_CHARS"
+cd ../..
 ```
 
-### Test Structure
+### 3. Restore, Build, and Apply Database Migrations
 
-- **Unit Tests**: Service and controller logic testing
-- **Integration Tests**: API endpoint testing with test database
-- **Performance Tests**: Load testing and benchmarks
-
-## 📖 API Documentation
-
-### Authentication Endpoints
-
-```
-POST /api/auth/login          # User login
-POST /api/auth/refresh        # Token refresh
-POST /api/auth/logout         # User logout
+```bash
+dotnet restore
+dotnet ef database update --project src/SolveStation.Data/SolveStation.Data.csproj --startup-project src/SolveStation.PharmacyApi/SolveStation.PharmacyApi.csproj
 ```
 
-### User Management
+### 4. Run the Backend API
 
+```bash
+dotnet run --project src/SolveStation.PharmacyApi/SolveStation.PharmacyApi.csproj
 ```
-GET    /api/users             # List users (Admin only)
-POST   /api/users             # Create user (Admin only)
-GET    /api/users/{id}        # Get user details
-PUT    /api/users/{id}        # Update user
-DELETE /api/users/{id}        # Delete user (Admin only)
+
+- **Swagger UI (Development):** `https://localhost:5001` (or `http://localhost:5000`)
+- **Health Check:** `/health`
+
+### 5. Run the Frontend Locally
+
+Serve the `frontend/` directory over a local HTTP server (such as VS Code Live Server on `http://127.0.0.1:5500` or Visual Studio **View in Browser**) and ensure `frontend/js/auth.js` points to your local API URL during local testing.
+
+---
+
+## 📖 Key API Endpoints
+
+### System & Authentication
+
+```text
+GET    /health                     # Service health probe (anonymous)
+POST   /api/auth/login             # Authenticate user and issue JWT + refresh token
+POST   /api/auth/refresh           # Rotate access token using refresh token
+POST   /api/auth/logout            # Revoke active refresh token
+```
+
+### Users
+
+```text
+GET    /api/users                  # List all users (Admin)
+POST   /api/users                  # Create user account (Admin)
+GET    /api/users/{id}             # Get user profile
+PUT    /api/users/{id}             # Update user profile
+DELETE /api/users/{id}             # Delete user (Admin)
+```
+
+### Drugs & Inventory
+
+```text
+GET    /api/drugs                  # List all medications and stock balances
+POST   /api/drugs                  # Register a new medication batch
+PUT    /api/drugs/{id}             # Update medication details, price, and expiry date
+PATCH  /api/drugs/{id}/stock       # Adjust medication stock quantity with audit reason
+DELETE /api/drugs/{id}             # Remove medication record
+GET    /api/drugs/low-stock        # Retrieve medications below minimum alert threshold
 ```
 
 ### Prescriptions
 
+```text
+GET    /api/prescriptions          # List prescriptions (filtered by user role)
+GET    /api/prescriptions/pending  # List incoming prescriptions awaiting dispense
+POST   /api/prescriptions          # Create a new prescription (Doctor)
+GET    /api/prescriptions/{id}     # Get prescription line items and patient details
+POST   /api/prescriptions/{id}/fill # Authorize dispense and automatically deduct stock
 ```
-GET    /api/prescriptions     # List prescriptions (role-based)
-POST   /api/prescriptions     # Create prescription (Doctor only)
-GET    /api/prescriptions/{id} # Get prescription details
-PUT    /api/prescriptions/{id} # Update prescription status
-```
-
-### Inventory
-
-```
-GET    /api/inventory         # List inventory (Pharmacist only)
-POST   /api/inventory         # Add inventory item
-PUT    /api/inventory/{id}    # Update inventory
-GET    /api/inventory/alerts  # Low stock alerts
-```
-
-For detailed API documentation, visit `/swagger` when running the application.
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. **Create feature branch**: `git checkout -b feature/YOUR-MODULE-001-description`
-2. **Follow coding conventions**: See [Team Task Delegation](docs/TEAM_TASK_DELEGATION.md)
-3. **Write tests**: Maintain >80% code coverage
-4. **Update documentation**: Keep README and API docs current
-5. **Submit Pull Request**: Include description and link issues
-
-### Code Quality
-
-- **StyleCop**: Enforces coding standards
-- **Nullable Reference Types**: Enabled project-wide
-- **EditorConfig**: Consistent formatting
-- **SonarQube**: Code quality analysis
-
-## 🏗️ Project Structure
-
-```
-solve-inventory-pharmacy/
-├── 📁 src/
-│   ├── 📦 SolveStation.Common/
-│   │   ├── Models/
-│   │   ├── Exceptions/
-│   │   ├── Extensions/
-│   │   └── Interfaces/
-│   ├── 📦 SolveStation.Authentication/
-│   │   ├── Controllers/
-│   │   ├── Services/
-│   │   ├── Models/
-│   │   └── Validators/
-│   ├── 📦 SolveStation.UserManagement/
-│   ├── 📦 SolveStation.PrescriptionManagement/
-│   ├── 📦 SolveStation.InventoryManagement/
-│   ├── 📦 SolveStation.Data/
-│   └── 📦 SolveStation.PharmacyApi/
-├── 📁 tests/
-│   ├── SolveStation.*.Tests/
-│   └── SolveStation.PharmacyApi.IntegrationTests/
-├── 📁 docs/
-│   ├── TEAM_TASK_DELEGATION.md
-│   └── architecture/
-├── 📁 scripts/
-└── 📄 README.md
-```
-
-## 🔒 Security
-
-- **JWT Authentication**: 1-hour token expiry with refresh capability
-- **Role-Based Access Control**: Granular permission system
-- **Input Validation**: Comprehensive request validation
-- **HTTPS Only**: All communications encrypted
-- **Audit Logging**: Track all user actions
-
-## 📊 Performance Targets
-
-| Metric           | Target | Current       |
-|------------------|--------|---------------|
-| Response Time    | <2s    | ⏱️ TBD        |
-| Concurrent Users | 10+    | 🔄 Testing    |
-| Uptime           | 99%+   | 📈 Monitoring |
-| Error Rate       | <1%    | 🎯 Tracking   |
-
-## 🚢 Deployment
-
-### Production Deployment
-
-```bash
-# Build production image
-docker build -t pharmacy-api:latest .
-
-# Run with production compose
-docker-compose -f docker-compose.prod.yml up -d
-
-# Health check
-curl https://your-domain.com/health
-```
-
-### Environment Variables
-
-```bash
-DATABASE_CONNECTION_STRING=    # PostgreSQL connection
-JWT_SECRET_KEY=               # JWT signing key
-JWT_ISSUER=                  # JWT issuer
-ASPNETCORE_ENVIRONMENT=      # Environment (Development/Production)
-```
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/SolveStation/solve-inventory-pharmacy/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/SolveStation/solve-inventory-pharmacy/discussions)
-- **Email**: support@solvestation.com
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/)
-- Database powered by [PostgreSQL](https://www.postgresql.org/)
-- Testing with [NUnit](https://nunit.org/)
-- Documentation with [Swagger/OpenAPI](https://swagger.io/)
 
 ---
 
-**⚡ Ready to revolutionize pharmacy management!**
+## 🚢 Production Deployment (Render + Neon)
 
-For detailed setup instructions and contribution guidelines, see
-the [Team Task Delegation Guide](docs/TEAM_TASK_DELEGATION.md).
+### 1. Database (Neon PostgreSQL)
+
+1. Create a PostgreSQL database on [Neon](https://neon.tech/).
+2. Copy the **Direct** connection details (avoid pooled connections when running EF Core migrations) and apply migrations:
+   ```bash
+   dotnet ef database update --project src/SolveStation.Data/SolveStation.Data.csproj --startup-project src/SolveStation.PharmacyApi/SolveStation.PharmacyApi.csproj --connection "Host=YOUR_NEON_HOST.aws.neon.tech;Port=5432;Database=neondb;Username=YOUR_USER;Password=YOUR_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
+   ```
+
+### 2. Backend Web Service (Render Docker)
+
+1. Create a **Web Service** on [Render](https://render.com/) connected to this repository using the **Docker** runtime (`./Dockerfile`) and set **Health Check Path** to `/health`.
+2. Configure the following environment variables in Render:
+
+```text
+ASPNETCORE_ENVIRONMENT=Production
+ConnectionStrings__DefaultConnection=Host=YOUR_NEON_HOST.aws.neon.tech;Port=5432;Database=neondb;Username=YOUR_USER;Password=YOUR_PASSWORD;SSL Mode=Require;Trust Server Certificate=true
+JwtSettings__SecretKey=YOUR_PRODUCTION_SECRET_KEY_AT_LEAST_32_CHARS
+JwtSettings__Issuer=PharmacySystem
+JwtSettings__Audience=PharmacySystemUsers
+JwtSettings__ExpirationInMinutes=60
+```
+
+### 3. Frontend Static Site (Render)
+
+1. Set the API base URL in `frontend/js/auth.js` to your Render Web Service URL (`https://pharminvms.onrender.com/api`).
+2. Ensure your Render Static Site origin (`https://pharminvmsys.onrender.com`) is listed in `WithOrigins(...)` inside `src/SolveStation.PharmacyApi/Program.cs`.
+3. Create a **Static Site** on Render with **Root Directory** set to `frontend`, **Build Command** left empty, and **Publish Directory** set to `.`.
+
+---
+
+## 🔒 Security Practices
+
+- **Zero Hardcoded Secrets:** Database credentials and JWT signing keys are excluded from source control via `.NET User Secrets` locally and injected via environment variables in production.
+- **JWT & Refresh Token Lifecycle:** Short-lived bearer tokens paired with database-backed refresh token rotation and revocation.
+- **Role-Based Authorization & CORS:** Strict origin allowlisting and role enforcement across API controllers and client views.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
